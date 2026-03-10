@@ -1,12 +1,27 @@
 #ifndef GPU_MANAGER_T_H
 #define GPU_MANAGER_T_H
 
-#include <sycl/sycl.hpp> // For SYCL members and functions
+#include <cuda_runtime.h>
+#include <cstdint>
+
 #include "silo_fwd.h" // For DSB and DSS
 #include "datasetstoragegpu.h" // For DSSGPU, SILO error handling, GPUInstance member functions
 #include "gpu_silo_fwd.h" // For DSSGPURead
 #include "logger.hpp"
 #include "cpu_globals.h"
+
+// FIXME: Move this to a seperate header
+#define CUDA_CHECK(call)                                                   \
+do {                                                                       \
+        cudaError_t err = (call);                                              \
+        if (err != cudaSuccess) {                                              \
+            fprintf(stderr,                                                    \
+                    "CUDA error at %s:%d: %s (%d)\n",                          \
+                    __FILE__, __LINE__,                                        \
+                    cudaGetErrorString(err), err);                             \
+            std::exit(EXIT_FAILURE);                                           \
+    }                                                                      \
+} while (0)
 
 namespace GDF
 {
@@ -22,37 +37,34 @@ public:
     *
     * Also, this only accepts an array of 3 integers, rather than an array of arbitrary size (which will happen if we use "uint64_t glob_range[3]")
    */
-   GPUManager_t(sycl_device_t deviceType, const uint64_t (&glob_range)[3], const uint64_t (&locl_range)[3], const std::string& device_name = ""):
-      m_que (custom_device_selector(deviceType, device_name)),
-      global_range{glob_range[0], glob_range[1], glob_range[2]}, local_range{locl_range[0], locl_range[1], locl_range[2]},
+   GPUManager_t(const uint32_t (&grid_in)[3], const uint32_t (&block_in)[3]):
+      grid{grid_in}, block{block_in},
       HtoD_memcpy_counter(0), DtoH_memcpy_counter(0), DtoD_memcpy_counter(0)
    {
+       int DevCount = -1;
+       CUDA_CHECK(cudaGetDeviceCount(&DevCount));
+       if(local_numprocs > DevCount)
+           log_msg("Number of ranks > number of GPUs!!!!!!");
+       int m_dev = DevCount % local_rank;
+       CUDA_CHECK(cudaSetDevice(m_dev));
+       CUDA_CHECK(cudaGetDeviceProperties(&m_prop, m_dev));
+
+       m_device_name = m_prop.name;
+
       // We currently only support 1D grids and blocks
-      assert(glob_range[0] == 1);
-      assert(glob_range[1] == 1);
-      assert(locl_range[0] == 1);
-      assert(locl_range[1] == 1);
-      assert(glob_range[2] % locl_range[2] == 0);
+      assert(grid.y == 1);
+      assert(grid.z == 1);
+      assert(block.y == 1);
+      assert(block.z == 1);
+      assert(block.x <= 1024);
 
-      print_device_name();
-      set_device_properties();
+      std::string message = "Device Set || Name: " + m_device_name;
+      log_msg(message);
 
-      std::string glob_range_msg = "Total number of threads launched for the GPU solver : " + std::to_string(global_range[2]);
-      std::string locl_range_msg = "Number of threads launched per workgroup for the GPU solver : " + std::to_string(local_range[2]);
-      log_msg(glob_range_msg);
-      log_msg(locl_range_msg);
-   }
-
-   GPUManager_t(): m_que(sycl::default_selector_v), global_range({0,0,0}), local_range({0,0,0}),
-      HtoD_memcpy_counter(0), DtoH_memcpy_counter(0), DtoD_memcpy_counter(0)
-   {
-      print_device_name();
-      set_device_properties();
-
-      std::string glob_range_msg = "Total number of threads launched for the GPU solver : " + std::to_string(global_range[2]);
-      std::string locl_range_msg = "Number of threads launched per workgroup for the GPU solver : " + std::to_string(local_range[2]);
-      log_msg(glob_range_msg);
-      log_msg(locl_range_msg);
+      std::string grid_msg = "Total number of threads launched for the GPU solver : " + std::to_string(global_range[2]);
+      std::string block_msg = "Number of threads launched per workgroup for the GPU solver : " + std::to_string(local_range[2]);
+      log_msg(grid_msg);
+      log_msg(block_msg);
    }
 
 private:
@@ -211,28 +223,16 @@ private:
 
    void transfer_to_cpu_internal(const dataSetBase* const dsb_entry, transfer_mode_t transfer_mode = transfer_mode_t::MOVE);
 
-   sycl::queue& get_queue_internal() // Needed for use in dataSetBaseGPU.h
-   {
-      return m_que;
-   }
-
-   sycl_device_vendor_t get_device_vendor_t_internal()
-   {
-      return m_device_vendor;
-   }
-
    void set_device_properties();
 
    void print_gpu_memcpy_counts_internal();
 
-   sycl::queue m_que;
-   sycl::range<3> global_range;
-   sycl::range<3> local_range;
+   dim3 grid;
+   dim3 block;
 
    // Device Properties
    std::string m_device_name;
-   sycl_device_vendor_t m_device_vendor;
-   sycl_device_t m_device_type;
+   cudaDeviceProp m_prop;
 
 public:
    uint64_t HtoD_memcpy_counter;

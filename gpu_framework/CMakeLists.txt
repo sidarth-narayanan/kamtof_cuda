@@ -6,6 +6,10 @@ set( GPU_FRAMEWORK_DIR  $ENV{GPU_FRAMEWORK_DIR} )
 
 aux_source_directory( ${GPU_FRAMEWORK_DIR}/src GpuFrameworkSrcTop)
 
+if(ENABLE_GPU)
+   set_source_files_properties(${GpuFrameworkSrcTop} PROPERTIES LANGUAGE CUDA)
+endif()
+
 add_library( gpu_framework ${GpuFrameworkSrcTop} )
 
 target_include_directories( gpu_framework PUBLIC
@@ -16,8 +20,7 @@ target_include_directories( gpu_framework PUBLIC
    $ENV{CPU_FRAMEWORK_DIR}/include/detail
 )
 
-find_package(oneMath REQUIRED)
-target_link_libraries(gpu_framework ONEMATH::onemath MPI::MPI_CXX)
+target_link_libraries(gpu_framework MPI::MPI_CXX) # FIXME: Add CUDA here
 
 ###### Add target and dependencies for unit tests ##############
 set( BUILD_TEST $ENV{BUILD_XDF_TESTS})
@@ -25,6 +28,10 @@ if (BUILD_TEST)
 
    set( GPU_FRAMEWORK_TEST_DIR ${GPU_FRAMEWORK_DIR}/test  )
    aux_source_directory( ${GPU_FRAMEWORK_TEST_DIR}/src GpuFrameworkTestSrcTop)
+
+   if(ENABLE_GPU)
+      set_source_files_properties(${GpuFrameworkTestSrcTop} PROPERTIES LANGUAGE CUDA)
+   endif()
 
    add_executable( gpu_framework_test ${GpuFrameworkTestSrcTop} )
 
