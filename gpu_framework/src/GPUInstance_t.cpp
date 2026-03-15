@@ -165,7 +165,7 @@ void* GPUInstance_t::get_valid_gpu_data()
    return m_temp_gpu_data ? m_temp_gpu_data : m_gpu_dss->void_data();
 }
 
-const dataSetBase* const GPUInstance_t::get_cpu_dsb_ptr() const
+const dataSetBase* GPUInstance_t::get_cpu_dsb_ptr() const
 {
    return m_cpu_dsb;
 }

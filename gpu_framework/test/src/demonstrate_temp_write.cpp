@@ -58,10 +58,10 @@ void demonstrate_temp_write_impl(bool async)
    while((err_nrm >= tolerance) && (iter <= max_iter)) // Iterate until we reach tolerance (or) max_iters
    {
       // Set x_(n) = x_(n+1)
-      GDF::memcpy_gpu_var(x_prev, x);
+      // GDF::memcpy_gpu_var(x_prev, x);
 
       // Copy the values of f(x_(n)) to the CPU for writing output. This sets the cpu_data_status to TEMP_WRITE for the variable 'fx'
-      GDF::transfer_to_cpu_copy(fx);
+      // GDF::transfer_to_cpu_copy(fx);
 
       // Compute the values for x_(n+1) and f(x_(n+1))
       if(async)
@@ -79,7 +79,7 @@ void demonstrate_temp_write_impl(bool async)
       write_output_on_cpu(iter);
 
       // Move the ownership of the 'fx' variable back to GPU without copying the data over as it was on TEMP_WRITE status
-      GDF::transfer_to_gpu_move(fx);
+      // GDF::transfer_to_gpu_move(fx);
 
       // Wait for the ASYNC operation to finish before computing the error norm
       GDF::gpu_barrier();
@@ -133,22 +133,22 @@ static void finalize_problem()
 
 static inline strict_fp_t f_x(const strict_fp_t& x)
 {
-   return (sycl::exp(-1.0 * x) - x);
+   return (exp(-1.0 * x) - x);
 }
 
 static inline strict_fp_t f_dash_x(const strict_fp_t& x)
 {
-   return ((-1.0*sycl::exp(-1.0 * x)) - 1.0);
+   return ((-1.0*exp(-1.0 * x)) - 1.0);
 }
 
 static void compute_error_norm()
 {
-   Parameter<strict_fp_t> err_nrm = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::PARAMETER>("Error_norm");
-   VectorRead<strict_fp_t> fx = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("function_eval_of_solution_vector");
+   // Parameter<strict_fp_t> err_nrm = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::PARAMETER>("Error_norm");
+   // VectorRead<strict_fp_t> fx = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("function_eval_of_solution_vector");
 
-   GDF::transfer_to_gpu_noinit(err_nrm);
-   GDF::transfer_to_gpu_readonly(fx);
-   GDF::l2_norm(vec_size, fx.gpu_data(), err_nrm.gpu_data());
+   // GDF::transfer_to_gpu_noinit(err_nrm);
+   // GDF::transfer_to_gpu_readonly(fx);
+   // GDF::l2_norm(vec_size, fx.gpu_data(), err_nrm.gpu_data());
 }
 
 class kg_compute_x_n_plus_1
@@ -160,22 +160,22 @@ public:
       gpu_fx(fx)
    {}
 
-   void operator() (sycl::nd_item<3> itm) const
-   {
-      size_t idx = GDF::get_1d_index(itm);
-      size_t stride = GDF::get_1d_stride(itm);
-      for(size_t kk = idx; kk < gpu_x.size(); kk += stride)
-      {
-         gpu_x[kk] = gpu_x_prev[kk] - (f_x(gpu_x_prev[kk])/f_dash_x(gpu_x_prev[kk]));
-         gpu_fx[kk] = f_x(gpu_x_prev[kk]);
-      }
-   }
+   // void operator() (nd_item<3> itm) const
+   // {
+   //    size_t idx = GDF::get_1d_index(itm);
+   //    size_t stride = GDF::get_1d_stride(itm);
+   //    for(size_t kk = idx; kk < gpu_x.size(); kk += stride)
+   //    {
+   //       gpu_x[kk] = gpu_x_prev[kk] - (f_x(gpu_x_prev[kk])/f_dash_x(gpu_x_prev[kk]));
+   //       gpu_fx[kk] = f_x(gpu_x_prev[kk]);
+   //    }
+   // }
 
-   template<uint8_t N>
-   void transfer_vars_to_gpu()
-   {
-      GDF::transfer_vars_to_gpu_impl<N>(gpu_x, gpu_x_prev, gpu_fx);
-   }
+   // template<uint8_t N>
+   // void transfer_vars_to_gpu()
+   // {
+   //    GDF::transfer_vars_to_gpu_impl<N>(gpu_x, gpu_x_prev, gpu_fx);
+   // }
 
 private:
    mutable VectorGPU<strict_fp_t> gpu_x;
@@ -185,20 +185,20 @@ private:
 
 static void compute_x_n_plus_1_async()
 {
-   Vector<strict_fp_t> x = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("solution_vector");
-   Vector<strict_fp_t> fx = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("function_eval_of_solution_vector");
-   VectorRead<strict_fp_t> x_prev = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("prev_solution_vector");
+   // Vector<strict_fp_t> x = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("solution_vector");
+   // Vector<strict_fp_t> fx = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("function_eval_of_solution_vector");
+   // VectorRead<strict_fp_t> x_prev = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("prev_solution_vector");
 
-   GDF::submit_to_gpu_async<kg_compute_x_n_plus_1>(x, x_prev, fx);
+   // GDF::submit_to_gpu_async<kg_compute_x_n_plus_1>(x, x_prev, fx);
 }
 
 static void compute_x_n_plus_1()
 {
-   Vector<strict_fp_t> x = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("solution_vector");
-   Vector<strict_fp_t> fx = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("function_eval_of_solution_vector");
-   VectorRead<strict_fp_t> x_prev = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("prev_solution_vector");
+   // Vector<strict_fp_t> x = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("solution_vector");
+   // Vector<strict_fp_t> fx = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("function_eval_of_solution_vector");
+   // VectorRead<strict_fp_t> x_prev = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("prev_solution_vector");
 
-   GDF::submit_to_gpu<kg_compute_x_n_plus_1>(x, x_prev, fx);
+   // GDF::submit_to_gpu<kg_compute_x_n_plus_1>(x, x_prev, fx);
 }
 
 static void write_output_on_cpu(const uint64_t iter)

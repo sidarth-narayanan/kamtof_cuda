@@ -14,38 +14,38 @@ int main (int argc, char** argv)
 
    setup_cdf_vars_for_gpu_framework_tests();
 
-   if(argc == 2)
-   {
-      switch (atoi(argv[1]))
-      {
-         case 1:
-         {
-            porting_stage_scenario();
-            break;
-         }
-         case 2:
-         {
-            demonstrate_temp_write_async();
-            break;
-         }
-         case 3:
-         {
-            demonstrate_temp_write();
-            break;
-         }
-         case 4:
-         {
-            backend_testing();
-            break;
-         }
-         default:
-         {
-            log_error("Incorrect CLI passed for gpu_framework_test. Valid options are 1 -> porting_stage_scenario, 2 -> demonstrate_temp_write_async, "
-                      "3 -> demonstrate_temp_write, 4 -> backend_testing ");
-         }
-      }
-   }
-   else
+   // if(argc == 2)
+   // {
+   //    switch (atoi(argv[1]))
+   //    {
+   //       case 1:
+   //       {
+   //          porting_stage_scenario();
+   //          break;
+   //       }
+   //       case 2:
+   //       {
+   //          demonstrate_temp_write_async();
+   //          break;
+   //       }
+   //       case 3:
+   //       {
+   //          demonstrate_temp_write();
+   //          break;
+   //       }
+   //       case 4:
+   //       {
+   //          backend_testing();
+   //          break;
+   //       }
+   //       default:
+   //       {
+   //          log_error("Incorrect CLI passed for gpu_framework_test. Valid options are 1 -> porting_stage_scenario, 2 -> demonstrate_temp_write_async, "
+   //                    "3 -> demonstrate_temp_write, 4 -> backend_testing ");
+   //       }
+   //    }
+   // }
+   // else
    {
       backend_testing();
    }

@@ -9,7 +9,7 @@
 #include "logger.hpp"
 
 
-dataSetBase::dataSetBase(const std::string& name, const uint64_t m_num_entries, const CDF::StorageType storage_type, const CDF::PODType pod_type, const uint8_t dims,
+dataSetBase::dataSetBase(const std::string& name, const uint64_t m_num_entries, const CDF::StorageType storage_type, const CDF::POD_t pod_type, const uint8_t dims,
                          const uint8_t * const shape, const bool is_unresolved_entry, const bool allocate_mem):
    m_data(nullptr),
    m_size(m_num_entries),
@@ -61,7 +61,7 @@ void dataSetBase::set_offsets(const uint8_t dims, const uint8_t * const shape)
    }
 }
 
-void dataSetBase::resize_internal(const uint64_t new_size)
+void dataSetBase::resize_internal(const size_t new_size)
 {
    assert(!m_num_offsets || m_offsets); // Make sure offsets are set (or) the element in ZEROD
    uint64_t new_byte_size = (m_offsets ? m_offsets[0] : get_single_element_byte_size(m_pod_type)) * new_size;
@@ -154,7 +154,7 @@ dataSetBase::~dataSetBase()
    }
 }
 
-void dataSetBase::allocate_m_data(const uint64_t byte_size)
+void dataSetBase::allocate_m_data(const size_t byte_size)
 {
    assert(!m_data);
 #ifdef GPU_DEVELOP

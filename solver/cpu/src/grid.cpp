@@ -562,10 +562,10 @@ void Grid::assign_mpi_grid()
 #ifdef ENABLE_GPU
    if(gpu_solver)
    {
-      mpiparams->gpu_sbuf = GDF::malloc_gpu_var<strict_fp_t>(ssize);
-      mpiparams->gpu_rbuf = GDF::malloc_gpu_var<strict_fp_t>(rsize);
-      mpiparams->gpu_slist = GDF::malloc_gpu_var<int>(involved_node);
-      mpiparams->gpu_rlist = GDF::malloc_gpu_var<int>(involved_node);
+      mpiparams->gpu_sbuf = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ssize);
+      mpiparams->gpu_rbuf = GDF::malloc_gpu_var(sizeof(strict_fp_t) * rsize);
+      mpiparams->gpu_slist = GDF::malloc_gpu_var(sizeof(int) * involved_node);
+      mpiparams->gpu_rlist = GDF::malloc_gpu_var(sizeof(int) * involved_node);
       GDF::memcpy_gpu_var(mpiparams->gpu_sbuf, sbuf, ssize);
       GDF::memcpy_gpu_var(mpiparams->gpu_rbuf, rbuf, rsize);
       GDF::memcpy_gpu_var(mpiparams->gpu_slist, slist, involved_node);

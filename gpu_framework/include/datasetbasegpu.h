@@ -48,7 +48,7 @@ public:
       return m_offsets;
    }
 
-   const uint8_t num_offsets() const
+   uint8_t num_offsets() const
    {
       return m_num_offsets;
    }
@@ -58,7 +58,7 @@ public:
       m_size = size_in;
    }
 
-   const size_t size() const
+   size_t size() const
    {
       return m_size;
    }

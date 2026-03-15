@@ -32,10 +32,10 @@ public:
 
    // Resize storage types for which all variables of the same size (CELL, FACE etc). Should not be called on VECTOR/PARAMETER
    template <CDF::StorageType TYPE>
-   void resize(const uint64_t& new_size);
+   void resize(const size_t& new_size);
 
    template<CDF::StorageType TYPE>
-   uint64_t get_size()
+   size_t get_size()
    {
       static_assert(TYPE != CDF::StorageType::VECTOR, "This function cannot be called on a VECTOR type");
       static_assert(TYPE != CDF::StorageType::NUM_STORAGE_TYPES, "This function must be called on a valid type");

@@ -1,8 +1,6 @@
 #ifndef DATASETSTORAGE_GPU_H
 #define DATASETSTORAGE_GPU_H
 
-#include <sycl/sycl.hpp>
-// #include "indexdataset.h" // For indexer used in operator()
 #include "silo_fwd.h" // For DSB and DSS
 #include "datasetbasegpu.h" // For DSBGPU
 #include "gpu_instance_t.h" // For GPUInstance member functions
@@ -21,7 +19,6 @@ public:
    dataSetStorageGPU(const dataSetStorage<T, TYPE, DIMS>& dss_obj, const GDF::GPUManager_t* manager):
       dataSetGPU<T, DIMS>(), // The member are null/0 intialized here and will be set later in allocate_gpu_data_ptr() because we also need to set the statuses
       m_gpu_manager((assert(manager), manager)),
-      is_primary(true),
       cpu_dss_ptr(dss_obj.m_dsb()),
       m_name(dss_obj.name().c_str())
    {
@@ -37,7 +34,6 @@ public:
    dataSetStorageGPU(const dataSetStorageGPU& other):
       dataSetGPU<T, DIMS>(other.m_gpu_data, other.m_num_offsets, other.m_offsets, other.m_size),
       m_gpu_manager(other.m_gpu_manager),
-      is_primary(false), // For copies from existing DSSGPU, is_primary is set to false to avoid unintended destruction
       cpu_dss_ptr(other.cpu_dss_ptr),
       m_name(other.m_name)
    {
@@ -49,15 +45,11 @@ public:
    ~dataSetStorageGPU()
    {
       // By the time this destructor is called, the data members should already be cleaned up and set to nullptr
-#ifndef DISABLE_GPU_KERNEL_ASSERTS
-      if(is_primary)
-      {
-         assert(!this->m_gpu_data);
-         assert(!this->m_offsets);
-         assert(this->m_num_offsets == 0);
-         assert(this->m_size == 0);
-      }
-#endif
+
+        assert(!this->m_gpu_data);
+        assert(!this->m_offsets);
+        assert(this->m_num_offsets == 0);
+        assert(this->m_size == 0);
    }
 
    template <class... Indices>
@@ -93,16 +85,6 @@ private:
    const GDF::GPUManager_t* m_gpu_manager = nullptr;
 
    /*
-    * This bool would only be set true for DSSGPU that GPU SILO backend constructs using the
-    * dataSetStorageGPU(const dataSetStorage& other, const GDF::GPUManager_t* manager)
-    *
-    * This is because SYCL implementation copies the kernel class a lot by value and also calls the destructor on these temp copies.
-    * This has the unintended consequence of calling sycl::free on offsets which would be avoided with the use of this variable which only
-    * allows the "primary" object to sycl::free the offsets
-   */
-   const bool is_primary = false;
-
-   /*
     * Stores a pointer of type DSS in DSB as the pointer object of this class is stored inside of GPUInstance
     * which in turn is held inside of StorageInfo which cannot be templated
     *
@@ -112,8 +94,5 @@ public:
    const dataSetBase* cpu_dss_ptr = nullptr;
    const char* m_name = nullptr;
 };
-
-template <class T, CDF::StorageType TYPE, uint8_t DIMS>
-struct sycl::is_device_copyable<dataSetStorageGPU<T, TYPE, DIMS>> : std::true_type {};
 
 #endif //DATASETSTORAGE_GPU_H

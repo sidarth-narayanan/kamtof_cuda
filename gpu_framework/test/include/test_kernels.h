@@ -15,13 +15,13 @@ public:
       scale(scale_in)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   // gdf_kernel void operator() (nd_item<3> itm) const;
 
-   template<uint8_t N>
-   void transfer_vars_to_gpu()
-   {
-      GDF::transfer_vars_to_gpu_impl<N>(pressure, scale);
-   }
+   // template<uint8_t N>
+   // void transfer_vars_to_gpu()
+   // {
+   //    GDF::transfer_vars_to_gpu_impl<N>(pressure, scale);
+   // }
 
 private:
    mutable CellGPU<strict_fp_t> pressure;
@@ -39,13 +39,13 @@ public:
       R(R_in)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   // gdf_kernel void operator() (nd_item<3> itm) const;
 
-   template<uint8_t N>
-   void transfer_vars_to_gpu()
-   {
-      GDF::transfer_vars_to_gpu_impl<N>(pressure, volume, temperature,n, R);
-   }
+   // template<uint8_t N>
+   // void transfer_vars_to_gpu()
+   // {
+   //    GDF::transfer_vars_to_gpu_impl<N>(pressure, volume, temperature,n, R);
+   // }
 
 private:
    mutable CellGPU<strict_fp_t> temperature;
@@ -66,13 +66,13 @@ public:
       R(R_in)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   // gdf_kernel void operator() (nd_item<3> itm) const;
 
-   template<uint8_t N>
-   void transfer_vars_to_gpu()
-   {
-      return GDF::transfer_vars_to_gpu_impl<N>(pressure, volume, temperature,n, R);
-   }
+   // template<uint8_t N>
+   // void transfer_vars_to_gpu()
+   // {
+   //    return GDF::transfer_vars_to_gpu_impl<N>(pressure, volume, temperature,n, R);
+   // }
 
 private:
    mutable CellGPU<strict_fp_t> pressure;
@@ -88,13 +88,13 @@ public:
    kg_test_kernel(const int xx, const strict_fp_t yy):x(xx), y(yy)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   // gdf_kernel void operator() (nd_item<3> itm) const;
 
-   template<uint8_t N>
-   void transfer_vars_to_gpu()
-   {
-      GDF::transfer_vars_to_gpu_impl<N>(x, y);
-   }
+   // template<uint8_t N>
+   // void transfer_vars_to_gpu()
+   // {
+   //    GDF::transfer_vars_to_gpu_impl<N>(x, y);
+   // }
 
 private:
    int x;
@@ -109,13 +109,13 @@ public:
       velocity(velocity_in), init_val_x(init_val_x_in), init_val_y(init_val_y_in), init_val_z(init_val_z_in)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   // gdf_kernel void operator() (nd_item<3> itm) const;
 
-   template<uint8_t N>
-   void transfer_vars_to_gpu()
-   {
-      GDF::transfer_vars_to_gpu_impl<N>(velocity, init_val_x, init_val_y, init_val_z);
-   }
+   // template<uint8_t N>
+   // void transfer_vars_to_gpu()
+   // {
+   //    GDF::transfer_vars_to_gpu_impl<N>(velocity, init_val_x, init_val_y, init_val_z);
+   // }
 
 private:
    mutable CellGPU<double,1> velocity;
@@ -132,7 +132,7 @@ public:
       size(size_in)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   // gdf_kernel void operator() (nd_item<3> itm) const;
 
 private:
    strict_fp_t* vec;
@@ -148,7 +148,7 @@ public:
       size(size_in)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   // gdf_kernel void operator() (nd_item<3> itm) const;
 
 private:
    strict_fp_t* result;
@@ -165,13 +165,13 @@ public:
       gpu_subtract_val(subtract_val)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   // gdf_kernel void operator() (nd_item<3> itm) const;
 
-   template<uint8_t N>
-   void transfer_vars_to_gpu()
-   {
-      GDF::transfer_vars_to_gpu_impl<N>(gpu_random_idx, gpu_silo_null, gpu_subtract_val);
-   }
+   // template<uint8_t N>
+   // void transfer_vars_to_gpu()
+   // {
+   //    GDF::transfer_vars_to_gpu_impl<N>(gpu_random_idx, gpu_silo_null, gpu_subtract_val);
+   // }
 
 private:
    const size_t gpu_random_idx;

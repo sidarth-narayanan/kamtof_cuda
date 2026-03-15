@@ -55,7 +55,7 @@ public:
       gpu_Q_boundary(Q_boundary)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -120,7 +120,7 @@ public:
       gpu_Q_cell(Q_cell)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -168,7 +168,7 @@ public:
       gpu_Q_cell(Q_cell)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -204,7 +204,7 @@ public:
       gpu_Q_cell(Q_cell)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -356,7 +356,7 @@ public:
       gpu_dQ(dQ)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -478,7 +478,7 @@ public:
       gpu_result(result)
    {}
 
-   void operator()(sycl::nd_item<3> item) const
+   void operator()(nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -512,7 +512,7 @@ public:
       gpu_result(result)
    {}
 
-   void operator()(sycl::nd_item<3> item) const
+   void operator()(nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -539,27 +539,27 @@ void Solver_base_gpu::bicgstab_linear_solver()
    GDF::memset_gpu_var(dQ_local.gpu_data(), 0, nrow_local);
 
    //Memory Allocations
-   strict_fp_t* const r0 = GDF::malloc_gpu_var<strict_fp_t>(ncol_local);
-   strict_fp_t* const r  = GDF::malloc_gpu_var<strict_fp_t>(ncol_local);
-   strict_fp_t* const p  = GDF::malloc_gpu_var<strict_fp_t>(ncol_local);
-   strict_fp_t* const Ap = GDF::malloc_gpu_var<strict_fp_t>(ncol_local);
-   strict_fp_t* const s  = GDF::malloc_gpu_var<strict_fp_t>(ncol_local);
-   strict_fp_t* const As = GDF::malloc_gpu_var<strict_fp_t>(ncol_local);
+   strict_fp_t* const r0 = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
+   strict_fp_t* const r  = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
+   strict_fp_t* const p  = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
+   strict_fp_t* const Ap = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
+   strict_fp_t* const s  = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
+   strict_fp_t* const As = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
 
-   strict_fp_t* const p1 = GDF::malloc_gpu_var<strict_fp_t>(ncol_local);
-   strict_fp_t* const s1 = GDF::malloc_gpu_var<strict_fp_t>(ncol_local);
+   strict_fp_t* const p1 = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
+   strict_fp_t* const s1 = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
 
    //Constants
-   strict_fp_t* const alpha1 = GDF::malloc_gpu_var<strict_fp_t, true>(1);
-   strict_fp_t* const omega1 = GDF::malloc_gpu_var<strict_fp_t, true>(1);
+   strict_fp_t* const alpha1 = GDF::malloc_gpu_var<true>(sizeof(strict_fp_t));
+   strict_fp_t* const omega1 = GDF::malloc_gpu_var<true>(sizeof(strict_fp_t));
    
-   strict_fp_t* const alpha = GDF::malloc_gpu_var<strict_fp_t, true>(1);
-   strict_fp_t* const beta = GDF::malloc_gpu_var<strict_fp_t, true>(1);
+   strict_fp_t* const alpha = GDF::malloc_gpu_var<true>(sizeof(strict_fp_t));
+   strict_fp_t* const beta = GDF::malloc_gpu_var<true>(sizeof(strict_fp_t));
 
-   strict_fp_t* const temp = GDF::malloc_gpu_var<strict_fp_t, true>(1);
+   strict_fp_t* const temp = GDF::malloc_gpu_var<true>(sizeof(strict_fp_t));
 
    // r0 = b-Ax
-   strict_fp_t* const Ax = GDF::malloc_gpu_var<strict_fp_t>(nrow_local);
+   strict_fp_t* const Ax = GDF::malloc_gpu_var(sizeof(strict_fp_t)* nrow_local);
    sparse_matvec(dQ_local.gpu_data(), Ax);
    GDF::submit_to_gpu<kg_bicgstab_xpby>(nrow_local, rhs_local.gpu_data(), -1.0, Ax, r0);
    GDF::free_gpu_var(Ax);
@@ -718,7 +718,7 @@ public:
       gpu_buf(buf)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -754,7 +754,7 @@ public:
       gpu_vec(vec)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -803,7 +803,7 @@ public:
       gpu_data(data)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -843,7 +843,7 @@ public:
       gpu_data(data)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -881,7 +881,7 @@ public:
       gpu_data_min(data_min)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -907,7 +907,7 @@ private:
 
 void Solver_base_gpu::compute_time_step(const int num_solved, const int num_attached)
 {
-   strict_fp_t* data = GDF::malloc_gpu_var<strict_fp_t>(num_solved);
+   strict_fp_t* data = GDF::malloc_gpu_var(sizeof(strict_fp_t) * num_solved);
    GDF::memset_gpu_var(data, 0, num_solved);
 
    VectorRead<int> number_of_neighbors_local = m_silo.retrieve_entry<int, CDF::StorageType::VECTOR>("number_of_neighbors_local");
@@ -926,7 +926,7 @@ void Solver_base_gpu::compute_time_step(const int num_solved, const int num_atta
                                                   boundary_area_local,
                                                   data);
    
-   strict_fp_t* min_value = GDF::malloc_gpu_var<strict_fp_t, true>(1);
+   strict_fp_t* min_value = GDF::malloc_gpu_var<true>(sizeof(strict_fp_t) * 1);
    min_value[0] = 1.e30;
 
    CellRead<strict_fp_t> volume_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("volume_local");
@@ -970,7 +970,7 @@ public:
       gpu_rdista(rdista)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -1032,7 +1032,7 @@ public:
       gpu_boundary_rdista(boundary_rdista)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -1123,7 +1123,7 @@ public:
       gpu_residual(residual)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -1173,7 +1173,7 @@ public:
       gpu_residual(residual)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -1214,13 +1214,13 @@ public:
       gpu_residual_norm(residual_norm)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
       for (unsigned int i = idx; i < gpu_num_solved; i += stride)
       {
-         GDF::atomic_add(gpu_residual_norm[0], sycl::fabs(gpu_residual[i]));
+         GDF::atomic_add(gpu_residual_norm[0], fabs(gpu_residual[i]));
       }
    }
 
@@ -1247,7 +1247,7 @@ public:
       gpu_rhs(rhs)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -1327,7 +1327,7 @@ public:
       gpu_A_data(A_data)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -1369,7 +1369,7 @@ public:
       gpu_A_data(A_data)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);
@@ -1422,7 +1422,7 @@ public:
       gpu_A_data(A_data)
    {}
 
-   void operator() (sycl::nd_item<3> item) const
+   void operator() (nd_item<3> item) const
    {
       size_t idx = GDF::get_1d_index(item);
       size_t stride = GDF::get_1d_stride(item);

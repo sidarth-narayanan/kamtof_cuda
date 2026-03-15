@@ -1,4 +1,5 @@
 #include "gpu_manager_t.h"
+#include "gpu_api_functions.h"
 #include <cassert>
 #include <algorithm>
 #include <sys/mman.h>
@@ -6,10 +7,8 @@
 namespace GDF
 {
 
-#ifdef GPU_DEVELOP
 void protect_m_data(const dataSetBase* const dsb_entry, GPUInstance_t& cur_gpu_instance, const xpu_data_status_t& cpu_data_status)
 {
-   /*
       // Validate/Invalidate the CPU/GPU data pointers based on the stauses
       if(cpu_data_status == xpu_data_status_t::OUT_OF_DATE)
          cur_gpu_instance.invalidate_cpu_data_ptr();
@@ -20,7 +19,6 @@ void protect_m_data(const dataSetBase* const dsb_entry, GPUInstance_t& cur_gpu_i
          cur_gpu_instance.invalidate_gpu_data_ptr();
       else
          cur_gpu_instance.validate_gpu_data_ptr();
-   */
 
    if(cpu_data_status == xpu_data_status_t::OUT_OF_DATE)
    {
@@ -45,61 +43,6 @@ void protect_m_data(const dataSetBase* const dsb_entry, GPUInstance_t& cur_gpu_i
       {
          log_msg<CDF::LogLevel::ERROR>(std::string("Failure while protecting data in transfer_to_gpu for variable: ") + dsb_entry->name());
       }
-   }
-}
-#endif
-
-void GPUManager_t::set_device_properties()
-{
-   // Set the device name
-   m_device_name = m_que.get_device().get_info<sycl::info::device::name>();
-
-   // Set the device vendor
-   std::string device_vendor(m_que.get_device().get_info<sycl::info::device::vendor>());
-   std::transform(device_vendor.begin(), device_vendor.end(), device_vendor.begin(), ::toupper);
-   if(device_vendor.find("AMD") != std::string::npos)
-   {
-      m_device_vendor = sycl_device_vendor_t::AMD;
-   }
-   else if(device_vendor.find("INTEL") != std::string::npos)
-   {
-      m_device_vendor = sycl_device_vendor_t::INTEL;
-   }
-   else if(device_vendor.find("NVIDIA") != std::string::npos)
-   {
-      m_device_vendor = sycl_device_vendor_t::NVIDIA;
-   }
-   else
-   {
-      std::string err_msg = "Error while selecting compute device: Compute device vendor " + device_vendor +" is not supported";
-      log_msg<CDF::LogLevel::ERROR>(err_msg);
-   }
-
-   // Set the sycl device type
-   sycl::info::device_type device_type = m_que.get_device().get_info<sycl::info::device::device_type>();
-   switch(device_type)
-   {
-   case sycl::info::device_type::cpu:
-   {
-      m_device_type = sycl_device_t::CPU;
-      break;
-   }
-   case sycl::info::device_type::gpu:
-   {
-      m_device_type = sycl_device_t::GPU;
-      break;
-   }
-   case sycl::info::device_type::accelerator:
-   {
-      m_device_type = sycl_device_t::ACCELERATOR;
-      break;
-   }
-   default:
-   {
-      std::string err_msg = "Error while selecting compute device: Compute device type is not supported, "
-                            "Please select set compute_device_type to CPU (or) GPU in preliminary.in";
-      log_msg<CDF::LogLevel::ERROR>(err_msg);
-   }
    }
 }
 
@@ -226,9 +169,8 @@ void GPUManager_t::transfer_to_gpu_internal(const dataSetBase* const dsb_entry, 
          // Sanity check to make sure src != dest and size is the same unless it's both nullptrs
          assert((cpu_m_data && gpu_m_data && (cpu_m_data != gpu_m_data)) || (!cpu_m_data && !gpu_m_data && (dsb_entry->byte_size() == 0)));
 #endif
-         // Do the actual SYCL memcpy
-         // GPU_TODO : Add MPI_SAFE_CALL equivalent for SYCL
-         m_que.memcpy(dest_data_ptr, src_data_ptr, dsb_entry->byte_size()).wait();
+         // Do the actual memcpy
+         GDF::memcpy_gpu_var(dest_data_ptr, src_data_ptr, dsb_entry->byte_size());
       }
 
       switch(transfer_mode)
@@ -458,9 +400,8 @@ void GPUManager_t::transfer_to_cpu_internal(const dataSetBase * const dsb_entry,
          // Sanity check to make sure src != dest and size is the same unless it's both nullptrs
          assert((cpu_m_data && gpu_m_data && (cpu_m_data != gpu_m_data)) || (!cpu_m_data && !gpu_m_data && (dsb_entry->byte_size() == 0)));
 #endif
-   // Do the actual SYCL memcpy
-   // GPU_TODO : Add MPI_SAFE_CALL equivalent for SYCL
-         m_que.memcpy(dest_data_ptr, src_data_ptr, dsb_entry->byte_size()).wait();
+   // Do the actual memcpy
+         GDF::memcpy_gpu_var(dest_data_ptr, src_data_ptr, dsb_entry->byte_size());
       }
 
       switch(transfer_mode)
@@ -583,13 +524,13 @@ void GPUManager_t::allocate_gpu_data_ptr(GPUInstance_t* cur_gpu_instance, const 
    assert(!cur_m_gpu_data); // This function should only be called when the actual m_data is null
 
    // Allocate the actual GPU data using malloc_device
-   cur_m_gpu_data = malloc_gpu_var_internal<void>(cur_cpu_dsb_ptr->byte_size());
+   cur_m_gpu_data = malloc_gpu_var_internal<void>(cur_cpu_dsb_ptr->byte_size()); // FIXME
    cur_gpu_dsb_ptr->set_data(cur_m_gpu_data);
    cur_gpu_dsb_ptr->set_size(cur_cpu_dsb_ptr->size());
    if(set_offsets)
       cur_gpu_dsb_ptr->set_offsets(cur_cpu_dsb_ptr->num_offsets(), cur_cpu_dsb_ptr->offsets());
 
-   cur_gpu_instance->set_xpu_data_status(xpu_t::CPU, xpu_data_status_t::UP_TO_DATE_WRITE);   
+   cur_gpu_instance->set_xpu_data_status(xpu_t::CPU, xpu_data_status_t::UP_TO_DATE_WRITE);
    cur_gpu_instance->set_xpu_data_status(xpu_t::GPU, xpu_data_status_t::OUT_OF_DATE);
    assert(cur_gpu_instance->get_xpu_data_status(xpu_t::CPU) == xpu_data_status_t::UP_TO_DATE_WRITE);
    assert(cur_gpu_instance->get_kernel_transfer_mode() == transfer_mode_t::NOT_SET);
@@ -610,7 +551,7 @@ void GPUManager_t::deallocate_gpu_data_ptr(GPUInstance_t* cur_gpu_instance)
       // Validate the gpu data ptr so that it can be deleted safely
       cur_gpu_instance->validate_gpu_data_ptr();
 
-      free_gpu_var_internal(cur_gpu_instance->get_gpu_dsb_ptr()->void_data());
+      GDF::free_gpu_var(cur_gpu_instance->get_gpu_dsb_ptr()->void_data());
       cur_gpu_instance->get_gpu_dsb_ptr()->set_data(nullptr);
       // We do not free the offsets here as this function is primarily used for resize where the offsets don't change
       // We free the offsets in storageInfo::deallocate_gpu_data_ptr() when the SILO object is destroyed
@@ -629,100 +570,12 @@ void GPUManager_t::resize_gpu_data_ptr(const dataSetBase* const dsb_obj)
    allocate_gpu_data_ptr(cur_gpu_instance, false);
 }
 
-void GPUManager_t::print_gpu_memcpy_counts_internal()
+void GPUManager_t::print_gpu_memcpy_counts()
 {
    std::string htod_msg = "Total number of HtoD Memcpy = " + std::to_string(HtoD_memcpy_counter);
    std::string dtoh_msg = "Total number of DtoH Memcpy = " + std::to_string(DtoH_memcpy_counter);
    log_msg(htod_msg);
    log_msg(dtoh_msg);
-}
-
-// allow_hypergpu : Allows multiple cores to select the same device (Primarily to validate multi-gpu runs on local machines during development)
-sycl::device custom_device_selector(const sycl_device_t& m_device_type, const std::string& m_device_name, const bool allow_hypergpu /* = false */)
-{
-   // Get the list of platforms and devices with the requested device and name
-   std::vector<sycl::platform> platform_list(sycl::platform::get_platforms());
-   std::vector<std::vector<sycl::device>> device_list(platform_list.size());
-   std::vector<uint8_t> num_gpus(platform_list.size(), 0);
-   for (uint8_t pltfrm_idx = 0; pltfrm_idx < platform_list.size(); pltfrm_idx++)
-   {
-      const sycl::platform& cur_platform = platform_list[pltfrm_idx];
-      device_list[pltfrm_idx].reserve(cur_platform.get_devices().size());
-      for (const sycl::device& cur_device : cur_platform.get_devices())
-      {
-         if (m_device_type == sycl_device_t::DEFAULT && m_device_name == "")
-         {
-            device_list[pltfrm_idx].emplace_back(cur_device);
-            if(cur_device.is_gpu())
-               num_gpus[pltfrm_idx]++;
-         }
-         else
-         {
-            if( (m_device_type == sycl_device_t::DEFAULT)             ||
-                (m_device_type == sycl_device_t::CPU && cur_device.is_cpu()) ||
-                (m_device_type == sycl_device_t::GPU && cur_device.is_gpu()) ||
-                (m_device_type == sycl_device_t::ACCELERATOR && cur_device.is_accelerator()))
-            {
-               std::string cur_device_name(cur_device.get_info<sycl::info::device::name>());
-               std::string m_device(m_device_name);
-               std::transform(cur_device_name.begin(), cur_device_name.end(), cur_device_name.begin(), ::toupper);
-               std::transform(m_device.begin(), m_device.end(), m_device.begin(), ::toupper);
-               if(cur_device_name.find(m_device) != std::string::npos)
-               {
-                  device_list[pltfrm_idx].emplace_back(cur_device);
-               }
-            }
-         }
-      }
-   }
-
-   if (m_device_type == sycl_device_t::DEFAULT && m_device_name == "")
-   {
-      uint8_t platform_to_select = std::distance(num_gpus.begin(), std::max_element(num_gpus.begin(), num_gpus.end()));
-      uint8_t num_devices = device_list[platform_to_select].size();
-      if(allow_hypergpu)
-      {
-         return device_list[platform_to_select][local_rank % num_devices];
-      }
-      else
-      {
-         if(num_devices >= local_numprocs)
-            return device_list[platform_to_select][local_rank];
-      }
-   }
-   else
-   {
-      // By now we should have the list the devices in every platform which is okay to be selected
-      for (uint8_t pltfrm_idx = 0; pltfrm_idx < platform_list.size(); pltfrm_idx++)
-      {
-         const uint8_t num_devices = device_list[pltfrm_idx].size();
-         if(allow_hypergpu)
-         {
-            if(num_devices == 0)
-               continue;
-            return device_list[pltfrm_idx][local_rank % num_devices];
-         }
-         else
-         {
-            if(num_devices < local_numprocs)
-               continue;
-            return device_list[pltfrm_idx][local_rank];
-         }
-      }
-   }
-
-   if(allow_hypergpu)
-   {
-      std::string err_msg = "No device of requested type is available!";
-      log_msg<CDF::LogLevel::ERROR>(err_msg);
-   }
-   else
-   {
-      std::string err_msg = "There are fewer devices of the type requested available than the number of cores launched on this node!";
-      log_msg<CDF::LogLevel::ERROR>(err_msg);
-   }
-
-   return sycl::device();
 }
 
 } // namespace GDF

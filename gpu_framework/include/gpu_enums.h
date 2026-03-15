@@ -3,6 +3,9 @@
 
 #include <cstdint> // For uint16_t
 
+#include <cuda_runtime.h>
+#define gdf_kernel __host__ __device__
+
 namespace  GDF
 {
 

@@ -45,7 +45,7 @@ public:
 
    void* get_valid_gpu_data(); // Return the non-null (or m_gpu_data is both are null) GPU data pointer
 
-   const dataSetBase* const get_cpu_dsb_ptr() const; // Return the CPU DSB associated with this GPU instance
+   const dataSetBase *get_cpu_dsb_ptr() const; // Return the CPU DSB associated with this GPU instance
 
 private:
    // Stores a pointer of type DSSGPU in DSBGPU as the object of this class is stored inside of StorageInfo which cannot be templated

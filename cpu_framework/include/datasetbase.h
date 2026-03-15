@@ -10,7 +10,7 @@
 namespace CDF
 {
 enum class StorageType : uint8_t;
-enum class PODType: uint8_t;
+enum class POD_t: uint8_t;
 }
 
 #ifdef ENABLE_GPU
@@ -25,14 +25,14 @@ enum class xpu_t : uint8_t;
 class dataSetBase
 {
 public:
-   dataSetBase(const std::string& name, const uint64_t m_num_entries, const CDF::StorageType storage_type, const CDF::PODType pod_type, const uint8_t dims, const uint8_t* const shape,
+   dataSetBase(const std::string& name, const uint64_t m_num_entries, const CDF::StorageType storage_type, const CDF::POD_t pod_type, const uint8_t dims, const uint8_t* const shape,
                const bool is_unresolved_entry, const bool allocate_mem);
 
    dataSetBase(const dataSetBase& other) = delete;
 
    ~dataSetBase();
 
-   const uint64_t size() const
+   size_t size() const
    {
       return m_size;
    }
@@ -52,7 +52,7 @@ public:
       return m_name;
    }
 
-   const uint64_t byte_size() const
+   size_t byte_size() const
    {
       return m_byte_size;
    }
@@ -67,7 +67,7 @@ public:
    }
 
    template<class T>
-   inline T& operator[](const uint64_t index)
+   inline T& operator[](const size_t index)
    {
 #ifndef NDEBUG
       assert(CDF::extractor<T>::PODType() == m_pod_type); // Make sure the calling type is the same as the register type
@@ -80,7 +80,7 @@ public:
    }
 
    template<class T>
-   const inline T& operator[](const uint64_t index) const
+   const inline T& operator[](const size_t index) const
    {
 #ifndef NDEBUG
       assert(CDF::extractor<T>::PODType() == m_pod_type); // Make sure the calling type is the same as the register type
@@ -97,17 +97,17 @@ public:
       return m_storage_type;
    }
 
-   CDF::PODType PODType() const
+   CDF::POD_t PODType() const
    {
       return m_pod_type;
    }
 
-   const uint32_t* const offsets() const
+   const uint32_t* offsets() const
    {
       return m_offsets;
    }
 
-   const uint8_t num_offsets() const
+   uint8_t num_offsets() const
    {
       return m_num_offsets;
    }
@@ -115,20 +115,20 @@ public:
 protected:
 
    void set_offsets(const uint8_t dims, const uint8_t* const shape);
-   void allocate_m_data(const uint64_t byte_size);
+   void allocate_m_data(const size_t byte_size);
    void delete_m_data();
-   void resize_internal(const uint64_t new_byte_size);
+   void resize_internal(const size_t new_byte_size);
 
    void* m_data;
 
-   uint64_t m_size;
-   uint64_t m_byte_size;
+   size_t m_size;
+   size_t m_byte_size;
 
    uint32_t* m_offsets;
    uint8_t m_num_offsets;
    uint8_t* m_shape;
 
-   CDF::PODType m_pod_type;
+   CDF::POD_t m_pod_type;
    CDF::StorageType m_storage_type;
    std::string m_name;
    bool is_unresolved;
@@ -140,9 +140,9 @@ protected:
    uint64_t allocation_size = 0; // The cloest multiple of system_page_size which is greater than m_byte_size
 
    void deallocate_gpu_data_ptr();
-   void allocate_page_aligned_memory_internal(const uint64_t byte_size);
+   void allocate_page_aligned_memory_internal(const size_t byte_size);
    void deallocate_page_aligned_memory_internal();
-   void copy_over_and_resize_page_aligned_memory(const uint64_t new_byte_size);
+   void copy_over_and_resize_page_aligned_memory(const size_t new_byte_size);
    void deallocate_gpu_instance();
    void destruct_gpu_instance();
    void* get_gpu_void_data();
@@ -179,7 +179,7 @@ public:
       gpu_instance = other;
    }
 
-   uint64_t get_allocation_size() const
+   size_t get_allocation_size() const
    {
       return allocation_size;
    }

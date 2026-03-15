@@ -47,21 +47,21 @@ public:
       T_gpu(T)
    {}
 
-   void operator() (sycl::nd_item<3> itm) const
-   {
-      size_t idx = GDF::get_1d_index(itm);
-      size_t stride = GDF::get_1d_stride(itm);
-      for(size_t kk = idx; kk < P_gpu.size(); kk += stride)
-      {
-         P_gpu[kk] = V_gpu[kk] * sycl::fabs(1.33 - T_gpu[kk]);
-      }
-   }
+   // void operator() (nd_item<3> itm) const
+   // {
+   //    size_t idx = GDF::get_1d_index(itm);
+   //    size_t stride = GDF::get_1d_stride(itm);
+   //    for(size_t kk = idx; kk < P_gpu.size(); kk += stride)
+   //    {
+   //       P_gpu[kk] = V_gpu[kk] * fabs(1.33 - T_gpu[kk]);
+   //    }
+   // }
 
-   template<uint8_t N>
-   void transfer_vars_to_gpu()
-   {
-      GDF::transfer_vars_to_gpu_impl<N>(P_gpu, V_gpu, T_gpu);
-   }
+   // template<uint8_t N>
+   // void transfer_vars_to_gpu()
+   // {
+   //    GDF::transfer_vars_to_gpu_impl<N>(P_gpu, V_gpu, T_gpu);
+   // }
 
 private:
    mutable CellGPU<strict_fp_t> P_gpu;
@@ -71,12 +71,12 @@ private:
 
 static void set_P()
 {
-   Cell<strict_fp_t> P = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("variable_P");
-   CellRead<strict_fp_t> V = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("variable_V");
-   CellRead<strict_fp_t> T = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("variable_T");
+   // Cell<strict_fp_t> P = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("variable_P");
+   // CellRead<strict_fp_t> V = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("variable_V");
+   // CellRead<strict_fp_t> T = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("variable_T");
 
-   GDF::transfer_to_gpu_noinit(P); // The previous values of P are not required as it is completely overwrittern
-   GDF::submit_to_gpu<kg_set_P>(P, V, T);
+   // GDF::transfer_to_gpu_noinit(P); // The previous values of P are not required as it is completely overwrittern
+   // GDF::submit_to_gpu<kg_set_P>(P, V, T);
 }
 
 
@@ -113,21 +113,21 @@ public:
       T_gpu(T)
    {}
 
-   void operator() (sycl::nd_item<3> itm) const
-   {
-      size_t idx = GDF::get_1d_index(itm);
-      size_t stride = GDF::get_1d_stride(itm);
-      for(size_t kk = idx; kk < V_gpu.size()/2; kk += stride)
-      {
-         V_gpu[kk] = P_gpu[kk]/(sycl::fabs(1.33 - T_gpu[kk]));
-      }
-   }
+   // void operator() (nd_item<3> itm) const
+   // {
+   //    size_t idx = GDF::get_1d_index(itm);
+   //    size_t stride = GDF::get_1d_stride(itm);
+   //    for(size_t kk = idx; kk < V_gpu.size()/2; kk += stride)
+   //    {
+   //       V_gpu[kk] = P_gpu[kk]/(fabs(1.33 - T_gpu[kk]));
+   //    }
+   // }
 
-   template<uint8_t N>
-   void transfer_vars_to_gpu()
-   {
-      GDF::transfer_vars_to_gpu_impl<N>(P_gpu, V_gpu, T_gpu);
-   }
+   // template<uint8_t N>
+   // void transfer_vars_to_gpu()
+   // {
+   //    GDF::transfer_vars_to_gpu_impl<N>(P_gpu, V_gpu, T_gpu);
+   // }
 
 private:
    CellGPURead<strict_fp_t> P_gpu;
@@ -137,9 +137,9 @@ private:
 
 static void update_V()
 {
-   CellRead<strict_fp_t> P = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("variable_P");
-   Cell<strict_fp_t> V = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("variable_V");
-   CellRead<strict_fp_t> T = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("variable_T");
+   // CellRead<strict_fp_t> P = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("variable_P");
+   // Cell<strict_fp_t> V = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("variable_V");
+   // CellRead<strict_fp_t> T = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("variable_T");
 
-   GDF::submit_to_gpu<kg_update_V>(P, V, T); // Only editing the first half of the variable V and hence cannot do 'noinit' transfer optimization
+   // GDF::submit_to_gpu<kg_update_V>(P, V, T); // Only editing the first half of the variable V and hence cannot do 'noinit' transfer optimization
 }
