@@ -104,76 +104,76 @@ void test_dss_gpu()
 
    pressure[33] = pr_val;
 
-//    GDF::submit_to_gpu<kg_compute_pressure>(pressure, volume, n, R, temperature);
+   GDF::submit_to_gpu<kg_compute_pressure>(pressure, volume, n, R, temperature);
 
-//    pressure[4] = volume[4];
-//    pressure[4] = ((n * R * init_temp)/volume[0]);
+   pressure[4] = volume[4];
+   pressure[4] = ((n * R * init_temp)/volume[0]);
 
-//    GDF::transfer_to_gpu_copy(scale);
-//    GDF::submit_to_gpu<kg_scale_pressure_and_change_scale>(pressure, scale);
+   GDF::transfer_to_gpu_copy(scale);
+   GDF::submit_to_gpu<kg_scale_pressure_and_change_scale>(pressure, scale);
 
-//    if(a_not_equal_b(scale, R, tol))
-//    {
-//       log_error("'transfer_to_gpu_copy' functionality not working : 'scale[0]' value should be " + std::to_string(R) + " instead of " + std::to_string(scale[0]));
-//    }
-// #ifndef NDEBUG
-//    else
-//    {
-//       log_progress("'transfer_to_gpu_copy' functionality working!");
-//    }
-// #endif
-//    GDF::transfer_to_cpu_move(scale);
+   if(a_not_equal_b(scale, R, tol))
+   {
+      log_error("'transfer_to_gpu_copy' functionality not working : 'scale[0]' value should be " + std::to_string(R) + " instead of " + std::to_string(scale[0]));
+   }
+#ifndef NDEBUG
+   else
+   {
+      log_progress("'transfer_to_gpu_copy' functionality working!");
+   }
+#endif
+   GDF::transfer_to_cpu_move(scale);
 
-//    GDF::submit_to_gpu<kg_compute_temperature>(temperature, pressure, n, R, volume);
+   GDF::submit_to_gpu<kg_compute_temperature>(temperature, pressure, n, R, volume);
 
-//    // Check if the values are correct
-//    for(int ii = 0; ii < pressure.size(); ii++)
-//    {
-//       assert(pressure.size() ==  temperature.size());
-//       if(a_not_equal_b(pressure[ii], pr_val, test_tol))
-//       {
-//          std::string error = "Pressure[" + std::to_string(ii) + "] = " + std::to_string(pressure[ii]) + " instead of " + std::to_string(pr_val) +
-//                              ". Kernel compute_pressure that does PV=nRT on GPU did NOT match CPU values!";
-//          log_msg<CDF::LogLevel::ERROR>(error);
-//       }
-//       if(a_not_equal_b(temperature[ii], init_temp*scale[0], test_tol))
-//       {
-//          std::string error = "Temperature[" + std::to_string(ii) + "] = " + std::to_string(temperature[ii]) + " instead of " + std::to_string(init_temp*scale[0]) +
-//                              ". Kernel compute_temperature that does PV=nRT on GPU did NOT match CPU values!";
-//          log_msg<CDF::LogLevel::ERROR>(error);
-//       }
-//    }
-// #ifndef NDEBUG
-//    log_msg("Kernel compute_pressure and compute_temperature that does P=nRT/V on GPU matched CPU values!");
-// #endif
+   // Check if the values are correct
+   for(int ii = 0; ii < pressure.size(); ii++)
+   {
+      assert(pressure.size() ==  temperature.size());
+      if(a_not_equal_b(pressure[ii], pr_val, test_tol))
+      {
+         std::string error = "Pressure[" + std::to_string(ii) + "] = " + std::to_string(pressure[ii]) + " instead of " + std::to_string(pr_val) +
+                             ". Kernel compute_pressure that does PV=nRT on GPU did NOT match CPU values!";
+         log_msg<CDF::LogLevel::ERROR>(error);
+      }
+      if(a_not_equal_b(temperature[ii], init_temp*scale[0], test_tol))
+      {
+         std::string error = "Temperature[" + std::to_string(ii) + "] = " + std::to_string(temperature[ii]) + " instead of " + std::to_string(init_temp*scale[0]) +
+                             ". Kernel compute_temperature that does PV=nRT on GPU did NOT match CPU values!";
+         log_msg<CDF::LogLevel::ERROR>(error);
+      }
+   }
+#ifndef NDEBUG
+   log_msg("Kernel compute_pressure and compute_temperature that does P=nRT/V on GPU matched CPU values!");
+#endif
 
-//    // ***------- Check a kernel without a SILO var -------*** //
-//    GDF::submit_to_gpu<kg_test_kernel>(10, pr_val);
-// #ifndef NDEBUG
-//    log_msg("Kernel without SILO variables executed successfully!");
-// #endif
+   // ***------- Check a kernel without a SILO var -------*** //
+   GDF::submit_to_gpu<kg_test_kernel>(10, pr_val);
+#ifndef NDEBUG
+   log_msg("Kernel without SILO variables executed successfully!");
+#endif
 
-//    // ***------- Check the operators for multi-dimensional data in DSSGPU, Also a check of update_gpu_offsets -------*** //
-//    const strict_fp_t vel_mag = 14.0; // 1^2 + 2^2 + 3^2
-//    const uint8_t vel_shape[1] = {3};
-//    Cell<strict_fp_t, 1> velocity = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL, 1>("velocity", vel_shape);
+   // ***------- Check the operators for multi-dimensional data in DSSGPU, Also a check of update_gpu_offsets -------*** //
+   const strict_fp_t vel_mag = 14.0; // 1^2 + 2^2 + 3^2
+   const uint8_t vel_shape[1] = {3};
+   Cell<strict_fp_t, 1> velocity = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL, 1>("velocity", vel_shape);
 
-//    GDF::submit_to_gpu<kg_set_initial_condition>(velocity, 1.0, 2.0, 3.0);
+   GDF::submit_to_gpu<kg_set_initial_condition>(velocity, 1.0, 2.0, 3.0);
 
-//    // Check if the values are correct
-//    for(int ii = 0; ii < velocity.size(); ii++)
-//    {
-//       strict_fp_t vel_mag_kk = pow(velocity(ii,0), 2) + pow(velocity(ii,1), 2) + pow(velocity(ii,2), 2);
-//       if(a_not_equal_b(vel_mag_kk, vel_mag, test_tol))
-//       {
-//          std::string error = "VelocityMagnitude[" + std::to_string(ii) + "] = " + std::to_string(vel_mag_kk) + "instead of " + std::to_string(vel_mag) +
-//                              ". Operator() check for multi-dimensional GPU data FAILED!";
-//          log_msg<CDF::LogLevel::ERROR>(error);
-//       }
-//    }
-//    #ifndef NDEBUG
-//    log_progress("Operator() check for multi-dimensional GPU data passed!");
-//    #endif
+   // Check if the values are correct
+   for(int ii = 0; ii < velocity.size(); ii++)
+   {
+      strict_fp_t vel_mag_kk = pow(velocity(ii,0), 2) + pow(velocity(ii,1), 2) + pow(velocity(ii,2), 2);
+      if(a_not_equal_b(vel_mag_kk, vel_mag, test_tol))
+      {
+         std::string error = "VelocityMagnitude[" + std::to_string(ii) + "] = " + std::to_string(vel_mag_kk) + "instead of " + std::to_string(vel_mag) +
+                             ". Operator() check for multi-dimensional GPU data FAILED!";
+         log_msg<CDF::LogLevel::ERROR>(error);
+      }
+   }
+   #ifndef NDEBUG
+   log_progress("Operator() check for multi-dimensional GPU data passed!");
+   #endif
 }
 
 // void test_dss_gpu_resize()

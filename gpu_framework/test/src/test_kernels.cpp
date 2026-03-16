@@ -5,56 +5,51 @@
 #include "gpu_api_functions.h"
 
 
-// void kg_scale_pressure_and_change_scale::operator() (nd_item<3> itm) const
-// {
-//    size_t idx = GDF::get_1d_index(itm);
-//    if(idx < pressure.size())
-//    {
-//       pressure[idx] *= scale[0];
-//       if(idx == pressure.size()-1)
-//       {
-//          scale[0] = idx * 1.0;
-//       }
-//    }
-// }
+gdf_kernel void kg_scale_pressure_and_change_scale::operator() (const size_t tid, const size_t stride) const
+{
+   if(tid < pressure.size())
+   {
+      pressure[tid] *= scale[0];
+      if(tid == pressure.size()-1)
+      {
+         scale[0] = tid * 1.0;
+      }
+   }
+}
 
-// void kg_compute_temperature::operator() (nd_item<3> itm) const
-// {
-//    size_t idx = GDF::get_1d_index(itm);
-//    if(idx < temperature.size())
-//    {
-//       temperature[idx] = (pressure[idx] * volume[idx])/(n * R);
-//    }
-// }
+gdf_kernel void kg_compute_temperature::operator() (const size_t tid, const size_t stride) const
+{
+   if(tid < temperature.size())
+   {
+      temperature[tid] = (pressure[tid] * volume[tid])/(n * R);
+   }
+}
 
-// void kg_compute_pressure::operator() (nd_item<3> itm) const
-// {
-//    size_t idx = GDF::get_1d_index(itm);
-//    if(idx < pressure.size())
-//    {
-//       pressure[idx] = (n * R * temperature[idx]) / (volume[idx]);
-//    }
-// }
+gdf_kernel void kg_compute_pressure::operator() (const size_t tid, const size_t stride) const
+{
+   if(tid < pressure.size())
+   {
+      pressure[tid] = (n * R * temperature[tid]) / (volume[tid]);
+   }
+}
 
-// void kg_test_kernel::operator() (nd_item<3> itm) const
-// {
-//    size_t idx = GDF::get_1d_index(itm);
-//    if(idx && x && y)
-//    {
-//       idx = x;
-//    }
-// }
+gdf_kernel void kg_test_kernel::operator() (const size_t tid, const size_t stride) const
+{
+   if(tid && x && y)
+   {
+      y = x;
+   }
+}
 
-// void kg_set_initial_condition::operator() (nd_item<3> itm) const
-// {
-//    size_t idx = GDF::get_1d_index(itm);
-//    if(idx < velocity.size())
-//    {
-//       velocity(idx,0) = init_val_x;
-//       velocity(idx,1) = init_val_y;
-//       velocity(idx,2) = init_val_z;
-//    }
-// }
+gdf_kernel void kg_set_initial_condition::operator() (const size_t tid, const size_t stride) const
+{
+   if(tid < velocity.size())
+   {
+      velocity(tid,0) = init_val_x;
+      velocity(tid,1) = init_val_y;
+      velocity(tid,2) = init_val_z;
+   }
+}
 
 // void kg_norm2::operator() (nd_item<3> itm) const
 // {

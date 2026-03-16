@@ -6,6 +6,7 @@
 #include <cassert> // For assert
 #include "datasetbasegpu.h"
 #include "indexdataset.h"
+#include "gpu_enums.h"
 
 template <class T, uint8_t DIMS /* = ZEROD */>
 class dataSetGPU : public dataSetBaseGPU
@@ -19,39 +20,39 @@ public:
       dataSetBaseGPU(data, num_offsets, offsets, num_entries)
    {}
 
-   size_t byte_size() const;
+   gdf_kernel size_t byte_size() const;
 
-   const T* data() const
+   gdf_kernel const T* data() const
    {
       return static_cast<T*>(this->m_gpu_data);
    }
 
-   T* data()
+   gdf_kernel T* data()
    {
       return static_cast<T*>(this->m_gpu_data);
    }
 
-   size_t total_num_elements() const;
+   gdf_kernel size_t total_num_elements() const;
 
-   inline const T& operator[](size_t idx) const
+   gdf_kernel inline const T& operator[](size_t idx) const
    {
       static_assert(DIMS == 0, "The [] operator is only for ZEROD in release mode and in debug mode for users to index the data as a 1D array");
       assert(this->m_gpu_data && "Variable is not transfered to GPU (or) Non existent SILO variable is used on the GPU");
-      assert(idx < this->m_num_entries);
+      assert(idx < this->m_size);
       return static_cast<T*>(this->m_gpu_data)[idx];
    }
 
-   inline T& operator[](size_t idx)
+   gdf_kernel inline T& operator[](size_t idx)
    {
       static_assert(DIMS == 0, "The [] operator is only for ZEROD in release mode and in debug mode for users to index the data as a 1D array");
       assert(this->m_gpu_data && "Variable is not transfered to GPU (or) Non existent SILO variable is used on the GPU");
       assert(!is_read_only && "Trying to get access to a read only data in an editable way");
-      assert(idx < this->m_num_entries);
+      assert(idx < this->m_size);
       return static_cast<T*>(this->m_gpu_data)[idx];
    }
 
    template <class... Indices>
-   inline T& operator()(Indices&&... idx)
+   gdf_kernel inline T& operator()(Indices&&... idx)
    {
       static_assert(DIMS > 0, "This interface is not intended for 0 dimensional data");
       static_assert(DIMS + 1 == sizeof...(Indices), "You have provided the wrong number of arguments");
@@ -61,7 +62,7 @@ public:
    }
 
    template <class... Indices>
-   const inline T& operator()(Indices&&... idx) const
+   gdf_kernel const inline T& operator()(Indices&&... idx) const
    {
       static_assert(DIMS > 0, "This interface is not intended for 0 dimensional data");
       static_assert(DIMS + 1 == sizeof...(Indices), "You have provided the wrong number of arguments");
@@ -70,7 +71,7 @@ public:
    }
 
    // Both const and non-const objects can call this function
-   inline bool exists() const
+   gdf_kernel inline bool exists() const
    {
       // For now, we are doing the simple check if the GPU data exists
       return this->void_data();

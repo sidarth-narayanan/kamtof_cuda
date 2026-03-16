@@ -1,5 +1,4 @@
-#ifndef TEST_KERNELS_H
-#define TEST_KERNELS_H
+#pragma once
 
 #include "datasetstoragegpu.h" // For DSSGPU
 #include "gpu_enums.h" // For GDF namespace
@@ -15,13 +14,13 @@ public:
       scale(scale_in)
    {}
 
-   // gdf_kernel void operator() (nd_item<3> itm) const;
+   gdf_kernel void operator() (const size_t tid, const size_t stride) const;
 
-   // template<uint8_t N>
-   // void transfer_vars_to_gpu()
-   // {
-   //    GDF::transfer_vars_to_gpu_impl<N>(pressure, scale);
-   // }
+   template<uint8_t N>
+   void transfer_vars_to_gpu()
+   {
+      GDF::transfer_vars_to_gpu_impl<N>(pressure, scale);
+   }
 
 private:
    mutable CellGPU<strict_fp_t> pressure;
@@ -39,13 +38,13 @@ public:
       R(R_in)
    {}
 
-   // gdf_kernel void operator() (nd_item<3> itm) const;
+   gdf_kernel void operator() (const size_t tid, const size_t stride) const;
 
-   // template<uint8_t N>
-   // void transfer_vars_to_gpu()
-   // {
-   //    GDF::transfer_vars_to_gpu_impl<N>(pressure, volume, temperature,n, R);
-   // }
+   template<uint8_t N>
+   void transfer_vars_to_gpu()
+   {
+      GDF::transfer_vars_to_gpu_impl<N>(pressure, volume, temperature,n, R);
+   }
 
 private:
    mutable CellGPU<strict_fp_t> temperature;
@@ -66,13 +65,13 @@ public:
       R(R_in)
    {}
 
-   // gdf_kernel void operator() (nd_item<3> itm) const;
+   gdf_kernel void operator() (const size_t tid, const size_t stride) const;
 
-   // template<uint8_t N>
-   // void transfer_vars_to_gpu()
-   // {
-   //    return GDF::transfer_vars_to_gpu_impl<N>(pressure, volume, temperature,n, R);
-   // }
+   template<uint8_t N>
+   void transfer_vars_to_gpu()
+   {
+      return GDF::transfer_vars_to_gpu_impl<N>(pressure, volume, temperature,n, R);
+   }
 
 private:
    mutable CellGPU<strict_fp_t> pressure;
@@ -88,17 +87,17 @@ public:
    kg_test_kernel(const int xx, const strict_fp_t yy):x(xx), y(yy)
    {}
 
-   // gdf_kernel void operator() (nd_item<3> itm) const;
+   gdf_kernel void operator() (const size_t tid, const size_t stride) const;
 
-   // template<uint8_t N>
-   // void transfer_vars_to_gpu()
-   // {
-   //    GDF::transfer_vars_to_gpu_impl<N>(x, y);
-   // }
+   template<uint8_t N>
+   void transfer_vars_to_gpu()
+   {
+      GDF::transfer_vars_to_gpu_impl<N>(x, y);
+   }
 
 private:
    int x;
-   strict_fp_t y;
+   mutable strict_fp_t y;
 
 };
 
@@ -109,13 +108,13 @@ public:
       velocity(velocity_in), init_val_x(init_val_x_in), init_val_y(init_val_y_in), init_val_z(init_val_z_in)
    {}
 
-   // gdf_kernel void operator() (nd_item<3> itm) const;
+   gdf_kernel void operator() (const size_t tid, const size_t stride) const;
 
-   // template<uint8_t N>
-   // void transfer_vars_to_gpu()
-   // {
-   //    GDF::transfer_vars_to_gpu_impl<N>(velocity, init_val_x, init_val_y, init_val_z);
-   // }
+   template<uint8_t N>
+   void transfer_vars_to_gpu()
+   {
+      GDF::transfer_vars_to_gpu_impl<N>(velocity, init_val_x, init_val_y, init_val_z);
+   }
 
 private:
    mutable CellGPU<double,1> velocity;
@@ -178,5 +177,3 @@ private:
    mutable CellGPU<strict_fp_t> gpu_silo_null;
    const strict_fp_t gpu_subtract_val;
 };
-
-#endif // TESTS_KERNELS_h

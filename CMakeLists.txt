@@ -19,6 +19,7 @@ if (ENABLE_GPU)
    add_definitions(-DENABLE_GPU)
    enable_language(CUDA)
    set(CMAKE_CUDA_ARCHITECTURES 86)
+   set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
    message(STATUS "Buidling for the following CUDA architecture: ${CMAKE_CUDA_ARCHITECTURES}")
 endif()
 

@@ -141,7 +141,7 @@ void GPUManager_t::allocate_gpu_instance(const dataSetStorage<T, TYPE, DIMS>& ds
       *  Note that the members of DSBGPU is default intialized to null/0 values at this point and
       *  will only be populated correctly after the calling allocate_gpu_data_ptr()
       */
-        dataSetStorageGPU<T, TYPE, DIMS>* dss_gpu_obj = new dataSetStorageGPU<T, TYPE, DIMS>(dss_obj, this);
+        dataSetStorageGPU<T, TYPE, DIMS>* dss_gpu_obj = new dataSetStorageGPU<T, TYPE, DIMS>(dss_obj);
 
         // DSSGPU pointer is stored as DSB pointer inside gpu_instance as it is not templated
         // Should cast up to DSSGPU when members/data of DSSGPU are accessed

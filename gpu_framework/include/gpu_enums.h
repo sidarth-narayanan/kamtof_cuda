@@ -4,8 +4,14 @@
 #include <cstdint> // For uint16_t
 
 #include <cuda_runtime.h>
-#define gdf_kernel __host__ __device__
 
+#ifdef ENABLE_GPU
+    #define gdf_kernel __host__ __device__
+#else
+    #define gdf_kernel
+#endif
+
+#ifdef ENABLE_GPU
 namespace  GDF
 {
 
@@ -43,5 +49,5 @@ enum class xpu_data_status_t : uint8_t
 #define GZ 0 // Index used for getting object from GPU device pointers. Mainly useful for scalars
 
 } // GDF
-
+#endif // ENABLE_GPU
 #endif // GPU_ENUMS_H
