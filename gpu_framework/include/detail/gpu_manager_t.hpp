@@ -124,36 +124,6 @@ dataSetStorageGPU<T, TYPE, DIMS>& GPUManager_t::extract_gpu_data_for_extractor(d
     return *(static_cast<dataSetStorageGPU<T, TYPE, DIMS>*>(dsb_gpu));
 }
 
-template<typename T, bool async, typename... Us>
-void GPUManager_t::submit_to_gpu_internal(Us&&... args)
-{
-    callExtractorIfExists<T>(args...);
-
-    // Call the actual kernel
-    m_que.parallel_for(sycl::nd_range<3>{global_range,local_range}, T{extract_gpu_data_for_kernel(std::forward<Us>(args))...});
-
-    if constexpr (!async)
-        m_que.wait();
-}
-
-
-template<typename T, typename... Us>
-void GPUManager_t::submit_to_gpu_single_workgroup_internal(Us&&... args)
-{
-    // Call the actual kernel
-    m_que.parallel_for(sycl::nd_range<3>{{1,1,SINGLE_WG_SIZE},{1,1,SINGLE_WG_SIZE}}, T{extract_gpu_data_for_kernel(std::forward<Us>(args))...});
-    m_que.wait();
-}
-
-
-template<typename T, typename... Us>
-void GPUManager_t::single_task_gpu_internal(Us&&... args)
-{
-    // Call the actual kernel
-    m_que.single_task(T{extract_gpu_data_for_kernel(std::forward<Us>(args))...});
-    m_que.wait();
-}
-
 template <class T, CDF::StorageType TYPE, uint8_t DIMS /*= ZEROD*/>
 void GPUManager_t::allocate_gpu_instance(const dataSetStorage<T, TYPE, DIMS>& dss_obj)
 {

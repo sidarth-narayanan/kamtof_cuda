@@ -9,17 +9,6 @@ namespace GDF
 
 void protect_m_data(const dataSetBase* const dsb_entry, GPUInstance_t& cur_gpu_instance, const xpu_data_status_t& cpu_data_status)
 {
-      // Validate/Invalidate the CPU/GPU data pointers based on the stauses
-      if(cpu_data_status == xpu_data_status_t::OUT_OF_DATE)
-         cur_gpu_instance.invalidate_cpu_data_ptr();
-      else
-         cur_gpu_instance.validate_cpu_data_ptr();
-
-      if((gpu_data_status == xpu_data_status_t::OUT_OF_DATE) || (gpu_data_status == xpu_data_status_t::RESIZED_ON_CPU))
-         cur_gpu_instance.invalidate_gpu_data_ptr();
-      else
-         cur_gpu_instance.validate_gpu_data_ptr();
-
    if(cpu_data_status == xpu_data_status_t::OUT_OF_DATE)
    {
       // Remove both read and write access to the data pointer
@@ -524,7 +513,7 @@ void GPUManager_t::allocate_gpu_data_ptr(GPUInstance_t* cur_gpu_instance, const 
    assert(!cur_m_gpu_data); // This function should only be called when the actual m_data is null
 
    // Allocate the actual GPU data using malloc_device
-   cur_m_gpu_data = malloc_gpu_var_internal<void>(cur_cpu_dsb_ptr->byte_size()); // FIXME
+   cur_m_gpu_data = GDF::malloc_gpu_var(cur_cpu_dsb_ptr->byte_size()); // FIXME
    cur_gpu_dsb_ptr->set_data(cur_m_gpu_data);
    cur_gpu_dsb_ptr->set_size(cur_cpu_dsb_ptr->size());
    if(set_offsets)

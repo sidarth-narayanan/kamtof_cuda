@@ -78,30 +78,6 @@ void transfer_to_cpu_syncandmove(Types& ... dss_objs)
    (gpu_manager->transfer_to_cpu_internal(dss_objs, transfer_mode_t::SYNC_AND_MOVE), ...);
 }
 
-template<typename T, typename... Us>
-void submit_to_gpu(Us&&... args)
-{
-   gpu_manager->submit_to_gpu_internal<T>(args...);
-}
-
-template<typename T, typename... Us>
-void submit_to_gpu_async(Us&&... args)
-{
-   gpu_manager->submit_to_gpu_internal<T, true>(args...);
-}
-
-template<typename T, typename... Us>
-void submit_to_gpu_single_workgroup(Us&&... args)
-{
-   gpu_manager->submit_to_gpu_single_workgroup_internal<T>(args...);
-}
-
-template<typename T, typename... Us>
-void single_task_gpu(Us&&... args)
-{
-   gpu_manager->single_task_gpu_internal<T>(args...);
-}
-
 // Device wide barrier
 inline void gpu_barrier()
 {
@@ -235,6 +211,59 @@ void transfer_vars_to_gpu_impl(Us&&... args)
 {
     static_assert(N ==  sizeof...(args));
     (transfer_vars_to_gpu_internal(args), ...);
+}
+
+// Primary template: Default case, transfer_vars_to_gpu<uint8_t>() does not exist
+template <typename, typename = std::void_t<>>
+struct has_extractor : std::false_type {};
+
+// Specialization: Detects if transfer_vars_to_gpu<uint8_t>() exists in the class
+template <typename T>
+struct has_extractor<T, std::void_t<decltype(std::declval<T>().template transfer_vars_to_gpu<1>())>> : std::true_type {};
+
+// Function that calls transfer_vars_to_gpu<uint8_t>() only if it exists
+template <typename Functor, typename... Us>
+void callExtractorIfExists(Us&&... args)
+{
+    if constexpr (has_extractor<Functor>::value) // Compile-time check
+    {
+        constexpr uint8_t N = sizeof...(args);
+        Functor obj{gpu_manager->extract_gpu_data_for_extractor(std::forward<Us>(args))...};
+        obj.template transfer_vars_to_gpu<N>();
+    }
+}
+
+template<typename Functor>
+__global__ void submit_kernel(Functor& f)
+{
+    const size_t tid = (blockIdx.x * blockDim.x) + threadIdx.x;
+    const size_t stride = (gridDim.x * blockDim.x);
+
+    f(tid, stride);
+}
+
+template<typename Functor, bool async = false, typename... Us>
+void submit_to_gpu_impl(Us&&... args)
+{
+    callExtractorIfExists<Functor>(args...);
+    Functor obj{gpu_manager->extract_gpu_data_for_kernel(std::forward<Us>(args))...};
+
+    submit_kernel<Functor><<<gpu_manager->grid, gpu_manager->block>>>(obj);
+
+    if constexpr (!async)
+        CUDA_CHECK(cudaDeviceSynchronize());
+}
+
+template<typename Functor, typename... Us>
+void submit_to_gpu(Us&&... args)
+{
+    submit_to_gpu_impl<Functor, false>(args...);
+}
+
+template<typename Functor, typename... Us>
+void submit_to_gpu_async(Us&&... args)
+{
+    submit_to_gpu_impl<Functor, true>(args...);
 }
 
 } // namespace GDF
