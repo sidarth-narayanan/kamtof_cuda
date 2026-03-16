@@ -17,163 +17,163 @@
 
 bool a_not_equal_b(const strict_fp_t& a, const strict_fp_t& b, const strict_fp_t& tol_percent)
 {
-   if(a == b) // If both are exactly equal to zero (or) specific strict_fp_t, no need to calculate percentage error
-      return false;
-   strict_fp_t err = a - b;
-   strict_fp_t percent_err[2];
-   if(a != 0.0)
-   {
-      percent_err[0] = fabs(100* (err/a));
-   }
-   if(b != 0.0)
-   {
-      percent_err[1] = fabs(100* (err/b));
-   }
-   percent_err[0] = (percent_err[0] >= percent_err[1]) ? percent_err[0] : percent_err[1];
+    if(a == b) // If both are exactly equal to zero (or) specific strict_fp_t, no need to calculate percentage error
+        return false;
+    strict_fp_t err = a - b;
+    strict_fp_t percent_err[2];
+    if(a != 0.0)
+    {
+        percent_err[0] = fabs(100* (err/a));
+    }
+    if(b != 0.0)
+    {
+        percent_err[1] = fabs(100* (err/b));
+    }
+    percent_err[0] = (percent_err[0] >= percent_err[1]) ? percent_err[0] : percent_err[1];
 
-   return (percent_err[0] <= tol_percent) ? false : true;
+    return (percent_err[0] <= tol_percent) ? false : true;
 }
 
 void setup_gpu_globals_test()
 {
-   // Setup GPU Manager
-   assert(!gpu_manager);
-   gpu_manager = new GDF::GPUManager_t(4, 256);
+    // Setup GPU Manager
+    assert(!gpu_manager);
+    gpu_manager = new GDF::GPUManager_t(4, 256);
 }
 
 void finalize_gpu_globals_test()
 {
-   assert(gpu_manager);
-   GDF::gpu_barrier();
+    assert(gpu_manager);
+    GDF::gpu_barrier();
 
-   // Finalize GPU Manager
-   delete gpu_manager;
-   gpu_manager = nullptr;
+    // Finalize GPU Manager
+    delete gpu_manager;
+    gpu_manager = nullptr;
 }
 
 void setup_cdf_vars_for_gpu_framework_tests()
 {
-   size_t cell_count = 256;
-   m_silo.resize<CDF::StorageType::CELL>(cell_count);
+    size_t cell_count = 256;
+    m_silo.resize<CDF::StorageType::CELL>(cell_count);
 
-   Cell<strict_fp_t> pressure = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL>("Pressure");
-   Cell<strict_fp_t> volume = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL>("Volume");
-   Cell<strict_fp_t> temperature = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL>("Temperature");
+    Cell<strict_fp_t> pressure = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL>("Pressure");
+    Cell<strict_fp_t> volume = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL>("Volume");
+    Cell<strict_fp_t> temperature = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL>("Temperature");
 
-   Cell<strict_fp_t> P = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL>("variable_P");
-   Cell<strict_fp_t> V = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL>("variable_V");
-   Cell<strict_fp_t> T = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL>("variable_T");
+    Cell<strict_fp_t> P = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL>("variable_P");
+    Cell<strict_fp_t> V = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL>("variable_V");
+    Cell<strict_fp_t> T = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL>("variable_T");
 
-   for(int ii = 0; ii < pressure.size(); ii++)
-   {
-      assert(pressure.size() ==  volume.size() && pressure.size() == temperature.size());
-      pressure[ii] = 101325.00;
-      volume[ii] = 2e-02;
-      temperature[ii] = 300.00;
+    for(int ii = 0; ii < pressure.size(); ii++)
+    {
+        assert(pressure.size() ==  volume.size() && pressure.size() == temperature.size());
+        pressure[ii] = 101325.00;
+        volume[ii] = 2e-02;
+        temperature[ii] = 300.00;
 
-      P[ii] = 0.0;
-      V[ii] = volume[ii];
-      T[ii] = temperature[ii];
-   }
+        P[ii] = 0.0;
+        V[ii] = volume[ii];
+        T[ii] = temperature[ii];
+    }
 }
 
 void test_global_local_range_setup()
 {
-   size_t cell_count = m_silo.get_size<CDF::StorageType::CELL>();
-   uint32_t gridDim, blockDim;
+    size_t cell_count = m_silo.get_size<CDF::StorageType::CELL>();
+    uint32_t gridDim, blockDim;
 
-   blockDim = 256;
-   gridDim = ceil((double)cell_count/blockDim);
+    blockDim = 256;
+    gridDim = ceil((double)cell_count/blockDim);
 
-   GDF::set_gpu_global_local_range(gridDim, blockDim);
+    GDF::set_gpu_global_local_range(gridDim, blockDim);
 }
 
 void test_dss_gpu()
 {
-   // ***------- Check a kernel with a SILO vars -------*** //
-   const strict_fp_t n = 1.0;
-   const strict_fp_t R = 8.314;
-   Cell<strict_fp_t> pressure = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("Pressure");
-   CellRead<strict_fp_t> volume = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("Volume");
-   Cell<strict_fp_t> temperature = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("Temperature");
-   const strict_fp_t init_temp = temperature[0];
-   Parameter<strict_fp_t> scale = m_silo.register_entry<strict_fp_t, CDF::StorageType::PARAMETER>("Pressure_scaling_factor");
-   scale[0] = R;
+    // ***------- Check a kernel with a SILO vars -------*** //
+    const strict_fp_t n = 1.0;
+    const strict_fp_t R = 8.314;
+    Cell<strict_fp_t> pressure = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("Pressure");
+    CellRead<strict_fp_t> volume = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("Volume");
+    Cell<strict_fp_t> temperature = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("Temperature");
+    const strict_fp_t init_temp = temperature[0];
+    Parameter<strict_fp_t> scale = m_silo.register_entry<strict_fp_t, CDF::StorageType::PARAMETER>("Pressure_scaling_factor");
+    scale[0] = R;
 
-   const strict_fp_t pr_val = ((n * R * init_temp)/volume[0]) * scale[0];
+    const strict_fp_t pr_val = ((n * R * init_temp)/volume[0]) * scale[0];
 
-   pressure[33] = pr_val;
+    pressure[33] = pr_val;
 
-   GDF::submit_to_gpu<kg_compute_pressure>(pressure, volume, n, R, temperature);
+    GDF::submit_to_gpu<kg_compute_pressure>(pressure, volume, n, R, temperature);
 
-   pressure[4] = volume[4];
-   pressure[4] = ((n * R * init_temp)/volume[0]);
+    pressure[4] = volume[4];
+    pressure[4] = ((n * R * init_temp)/volume[0]);
 
-   GDF::transfer_to_gpu_copy(scale);
-   GDF::submit_to_gpu<kg_scale_pressure_and_change_scale>(pressure, scale);
+    GDF::transfer_to_gpu_copy(scale);
+    GDF::submit_to_gpu<kg_scale_pressure_and_change_scale>(pressure, scale);
 
-   if(a_not_equal_b(scale, R, tol))
-   {
-      log_error("'transfer_to_gpu_copy' functionality not working : 'scale[0]' value should be " + std::to_string(R) + " instead of " + std::to_string(scale[0]));
-   }
+    if(a_not_equal_b(scale, R, tol))
+    {
+        log_error("'transfer_to_gpu_copy' functionality not working : 'scale[0]' value should be " + std::to_string(R) + " instead of " + std::to_string(scale[0]));
+    }
 #ifndef NDEBUG
-   else
-   {
-      log_progress("'transfer_to_gpu_copy' functionality working!");
-   }
+    else
+    {
+        log_progress("'transfer_to_gpu_copy' functionality working!");
+    }
 #endif
-   GDF::transfer_to_cpu_move(scale);
+    GDF::transfer_to_cpu_move(scale);
 
-   GDF::submit_to_gpu<kg_compute_temperature>(temperature, pressure, n, R, volume);
+    GDF::submit_to_gpu<kg_compute_temperature>(temperature, pressure, n, R, volume);
 
-   // Check if the values are correct
-   for(int ii = 0; ii < pressure.size(); ii++)
-   {
-      assert(pressure.size() ==  temperature.size());
-      if(a_not_equal_b(pressure[ii], pr_val, test_tol))
-      {
-         std::string error = "Pressure[" + std::to_string(ii) + "] = " + std::to_string(pressure[ii]) + " instead of " + std::to_string(pr_val) +
-                             ". Kernel compute_pressure that does PV=nRT on GPU did NOT match CPU values!";
-         log_msg<CDF::LogLevel::ERROR>(error);
-      }
-      if(a_not_equal_b(temperature[ii], init_temp*scale[0], test_tol))
-      {
-         std::string error = "Temperature[" + std::to_string(ii) + "] = " + std::to_string(temperature[ii]) + " instead of " + std::to_string(init_temp*scale[0]) +
-                             ". Kernel compute_temperature that does PV=nRT on GPU did NOT match CPU values!";
-         log_msg<CDF::LogLevel::ERROR>(error);
-      }
-   }
+    // Check if the values are correct
+    for(int ii = 0; ii < pressure.size(); ii++)
+    {
+        assert(pressure.size() ==  temperature.size());
+        if(a_not_equal_b(pressure[ii], pr_val, test_tol))
+        {
+            std::string error = "Pressure[" + std::to_string(ii) + "] = " + std::to_string(pressure[ii]) + " instead of " + std::to_string(pr_val) +
+                                ". Kernel compute_pressure that does PV=nRT on GPU did NOT match CPU values!";
+            log_msg<CDF::LogLevel::ERROR>(error);
+        }
+        if(a_not_equal_b(temperature[ii], init_temp*scale[0], test_tol))
+        {
+            std::string error = "Temperature[" + std::to_string(ii) + "] = " + std::to_string(temperature[ii]) + " instead of " + std::to_string(init_temp*scale[0]) +
+                                ". Kernel compute_temperature that does PV=nRT on GPU did NOT match CPU values!";
+            log_msg<CDF::LogLevel::ERROR>(error);
+        }
+    }
 #ifndef NDEBUG
-   log_msg("Kernel compute_pressure and compute_temperature that does P=nRT/V on GPU matched CPU values!");
-#endif
-
-   // ***------- Check a kernel without a SILO var -------*** //
-   GDF::submit_to_gpu<kg_test_kernel>(10, pr_val);
-#ifndef NDEBUG
-   log_msg("Kernel without SILO variables executed successfully!");
+    log_msg("Kernel compute_pressure and compute_temperature that does P=nRT/V on GPU matched CPU values!");
 #endif
 
-   // ***------- Check the operators for multi-dimensional data in DSSGPU, Also a check of update_gpu_offsets -------*** //
-   const strict_fp_t vel_mag = 14.0; // 1^2 + 2^2 + 3^2
-   const uint8_t vel_shape[1] = {3};
-   Cell<strict_fp_t, 1> velocity = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL, 1>("velocity", vel_shape);
+    // ***------- Check a kernel without a SILO var -------*** //
+    GDF::submit_to_gpu<kg_test_kernel>(10, pr_val);
+#ifndef NDEBUG
+    log_msg("Kernel without SILO variables executed successfully!");
+#endif
 
-   GDF::submit_to_gpu<kg_set_initial_condition>(velocity, 1.0, 2.0, 3.0);
+    // ***------- Check the operators for multi-dimensional data in DSSGPU, Also a check of update_gpu_offsets -------*** //
+    const strict_fp_t vel_mag = 14.0; // 1^2 + 2^2 + 3^2
+    const uint8_t vel_shape[1] = {3};
+    Cell<strict_fp_t, 1> velocity = m_silo.register_entry<strict_fp_t, CDF::StorageType::CELL, 1>("velocity", vel_shape);
 
-   // Check if the values are correct
-   for(int ii = 0; ii < velocity.size(); ii++)
-   {
-      strict_fp_t vel_mag_kk = pow(velocity(ii,0), 2) + pow(velocity(ii,1), 2) + pow(velocity(ii,2), 2);
-      if(a_not_equal_b(vel_mag_kk, vel_mag, test_tol))
-      {
-         std::string error = "VelocityMagnitude[" + std::to_string(ii) + "] = " + std::to_string(vel_mag_kk) + "instead of " + std::to_string(vel_mag) +
-                             ". Operator() check for multi-dimensional GPU data FAILED!";
-         log_msg<CDF::LogLevel::ERROR>(error);
-      }
-   }
-   #ifndef NDEBUG
-   log_progress("Operator() check for multi-dimensional GPU data passed!");
-   #endif
+    GDF::submit_to_gpu<kg_set_initial_condition>(velocity, 1.0, 2.0, 3.0);
+
+    // Check if the values are correct
+    for(int ii = 0; ii < velocity.size(); ii++)
+    {
+        strict_fp_t vel_mag_kk = pow(velocity(ii,0), 2) + pow(velocity(ii,1), 2) + pow(velocity(ii,2), 2);
+        if(a_not_equal_b(vel_mag_kk, vel_mag, test_tol))
+        {
+            std::string error = "VelocityMagnitude[" + std::to_string(ii) + "] = " + std::to_string(vel_mag_kk) + "instead of " + std::to_string(vel_mag) +
+                                ". Operator() check for multi-dimensional GPU data FAILED!";
+            log_msg<CDF::LogLevel::ERROR>(error);
+        }
+    }
+#ifndef NDEBUG
+    log_progress("Operator() check for multi-dimensional GPU data passed!");
+#endif
 }
 
 // void test_dss_gpu_resize()
@@ -497,17 +497,17 @@ void test_dss_gpu()
 void backend_testing()
 {
 
-   if(rank == 0)
-   {
-      test_global_local_range_setup();
-      test_dss_gpu();
-      // test_dss_gpu_resize();
-      // test_gpu_pointer_api_funcs();
-      // test_gpu_atomics();
-      // test_silo_null();
-   }
+    if(rank == 0)
+    {
+        test_global_local_range_setup();
+        test_dss_gpu();
+        // test_dss_gpu_resize();
+        // test_gpu_pointer_api_funcs();
+        // test_gpu_atomics();
+        // test_silo_null();
+    }
 
-   mpi_barrier();
+    mpi_barrier();
 
-   // test_ncpu_ngpu();
+    // test_ncpu_ngpu();
 }

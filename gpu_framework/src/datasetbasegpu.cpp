@@ -15,7 +15,7 @@ void dataSetBaseGPU::set_offsets(const uint8_t num_offsets, const uint32_t* offs
    if(offsets)
    {
       assert(m_offsets);
-      GDF::memcpy_gpu_var(m_offsets, offsets, sizeof(decltype(offsets))*(m_num_offsets));
+      GDF::memcpy_gpu_var(m_offsets, offsets, sizeof(uint32_t)*(m_num_offsets));
    }
 #ifndef NDEBUG
    else

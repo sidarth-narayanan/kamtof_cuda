@@ -23,9 +23,6 @@ void dataSetBase::deallocate_gpu_data_ptr()
     }
     else
     {
-        // Validate the GPU data pointer
-        gpu_instance->validate_gpu_data_ptr();
-
         GDF::free_gpu_var(gpu_instance->get_gpu_dsb_ptr()->void_data());
         gpu_instance->get_gpu_dsb_ptr()->set_data(nullptr);
         gpu_instance->get_gpu_dsb_ptr()->free_offsets();
@@ -52,7 +49,6 @@ void dataSetBase::deallocate_gpu_instance()
 
 void dataSetBase::destruct_gpu_instance()
 {
-    gpu_instance->validate_cpu_data_ptr(); // CPU data should be validated at this point
     deallocate_gpu_data_ptr(); // Deallocate m_gpu_data
     deallocate_gpu_instance(); // Deallocate m_gpu_dss
 }
@@ -90,11 +86,11 @@ void dataSetBase::transfer_to_cpu(bool read_only) const
 {
     if(read_only)
     {
-        // GDF::transfer_to_cpu(this, GDF::transfer_mode_t::READ_ONLY);
+        GDF::transfer_to_cpu(this, GDF::transfer_mode_t::READ_ONLY);
     }
     else
     {
-        // GDF::transfer_to_cpu(this, GDF::transfer_mode_t::MOVE);
+        GDF::transfer_to_cpu(this, GDF::transfer_mode_t::MOVE);
     }
 }
 
