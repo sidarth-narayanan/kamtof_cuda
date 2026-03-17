@@ -74,14 +74,16 @@ else()
    add_executable(solver ${CpuSolverSrcTop})
 endif()
 
-target_compile_options(solver PRIVATE
-    # C++ specific flags
-    $<$<COMPILE_LANGUAGE:CXX>: ${CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
-)
+set(NVCC_FLAGS_RELEASE -O3)
+set(NVCC_FLAGS_DEBUG -O0 -G -g)
+set(NVCC_FLAGS_PROF -O3 -lineinfo)
 
 target_compile_options(solver PRIVATE
     # CUDA specific flags
     $<$<COMPILE_LANGUAGE:CUDA>: ${NVCC_FLAGS_${CMAKE_BUILD_TYPE}} -Xcompiler ${CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
+
+    # C++ specific flags
+    $<$<COMPILE_LANGUAGE:CXX>: ${CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
 )
 
 

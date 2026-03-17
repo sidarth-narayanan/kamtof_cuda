@@ -566,10 +566,10 @@ void Grid::assign_mpi_grid()
       mpiparams->gpu_rbuf = GDF::malloc_gpu_var(sizeof(strict_fp_t) * rsize);
       mpiparams->gpu_slist = GDF::malloc_gpu_var(sizeof(int) * involved_node);
       mpiparams->gpu_rlist = GDF::malloc_gpu_var(sizeof(int) * involved_node);
-      GDF::memcpy_gpu_var(mpiparams->gpu_sbuf, sbuf, ssize);
-      GDF::memcpy_gpu_var(mpiparams->gpu_rbuf, rbuf, rsize);
-      GDF::memcpy_gpu_var(mpiparams->gpu_slist, slist, involved_node);
-      GDF::memcpy_gpu_var(mpiparams->gpu_rlist, rlist, involved_node);
+      GDF::memcpy_gpu_var(mpiparams->gpu_sbuf, sbuf, sizeof(strict_fp_t) * ssize);
+      GDF::memcpy_gpu_var(mpiparams->gpu_rbuf, rbuf, sizeof(strict_fp_t)* rsize);
+      GDF::memcpy_gpu_var(mpiparams->gpu_slist, slist, sizeof(int) * involved_node);
+      GDF::memcpy_gpu_var(mpiparams->gpu_rlist, rlist, sizeof(int) * involved_node);
    }
 #endif
 

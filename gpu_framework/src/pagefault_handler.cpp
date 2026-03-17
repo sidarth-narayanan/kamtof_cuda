@@ -89,7 +89,6 @@ void pagefault_handler(int sig, siginfo_t *info, void *context)
             void* bounding_address = static_cast<void*>(static_cast<char*>(it->first) + it->second->byte_size());
             if(fault_addr <= bounding_address) // If the fault_addr is in the holes/gap between the two entries in an array, it is a non GPU segfault
             {
-                log_debug("Auto-Transfer triggered!");
                 dsb_entry->transfer_to_cpu(in_const_operator); // Transfer the variable to CPU
                 in_const_operator = false;
                 return;

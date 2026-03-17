@@ -6,8 +6,6 @@
 #include "silo.h"
 #include "datasetstoragegpu.h"
 
-#define gdf_kernel __host__ __device__
-
 namespace GDF
 {
 
@@ -130,7 +128,7 @@ void memcpy_gpu_var(dataSetStorage<T, TYPE, DIMS>& dss_dest,const dataSetStorage
     T* const dest_data = dss_dest.gpu_data();
     assert(dest_data);
 
-    GDF::memcpy_gpu_var(dest_data, src_data, dss_src.size());
+    GDF::memcpy_gpu_var(dest_data, src_data, dss_src.byte_size());
 }
 
 // GPU MATH API FUNCTIONS

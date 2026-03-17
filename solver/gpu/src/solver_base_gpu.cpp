@@ -418,7 +418,7 @@ void Solver_base_gpu::jacobi_linear_solver(const int num_solved)
                                                   dQ_local);
       
       
-      GDF::memcpy_gpu_var(dQ_old_local.gpu_data(), dQ_local.gpu_data(), num_solved);
+      GDF::memcpy_gpu_var(dQ_old_local.gpu_data(), dQ_local.gpu_data(), sizeof(decltype(dQ_old_local[0])) * num_solved);
    }
 }
 
