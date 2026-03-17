@@ -441,48 +441,48 @@ void test_silo_null()
 
 }
 
-// void test_ncpu_ngpu()
-// {
-//    const uint64_t vec_size = 1024;
+void test_ncpu_ngpu()
+{
+   const uint64_t vec_size = 1024;
 
-//    std::random_device rd;
-//    std::mt19937 generator(rd());
-//    std::uniform_real_distribution<strict_fp_t> distribution(rank, rank+1);
+   std::random_device rd;
+   std::mt19937 generator(rd());
+   std::uniform_real_distribution<strict_fp_t> distribution(rank, rank+1);
 
-//    // Generate and print random strict_fp_ts
-//    std::vector<strict_fp_t> my_vec_cpu;
-//    strict_fp_t cpu_local_result = 0;
-//    strict_fp_t cpu_global_result = 0;
-//    my_vec_cpu.reserve(vec_size);
-//    for(uint64_t ii = 0; ii < vec_size; ii++)
-//    {
-//       my_vec_cpu.push_back(distribution(generator));
-//       cpu_local_result += (my_vec_cpu[ii]*my_vec_cpu[ii]);
-//    }
-//    MPI_Allreduce(&cpu_local_result, &cpu_global_result, 1, MPI_STRICT_FP_T, MPI_SUM, MPI_COMM_WORLD);
+   // Generate and print random strict_fp_ts
+   std::vector<strict_fp_t> my_vec_cpu;
+   strict_fp_t cpu_local_result = 0;
+   strict_fp_t cpu_global_result = 0;
+   my_vec_cpu.reserve(vec_size);
+   for(uint64_t ii = 0; ii < vec_size; ii++)
+   {
+      my_vec_cpu.push_back(distribution(generator));
+      cpu_local_result += (my_vec_cpu[ii]*my_vec_cpu[ii]);
+   }
+   MPI_Allreduce(&cpu_local_result, &cpu_global_result, 1, MPI_STRICT_FP_T, MPI_SUM, MPI_COMM_WORLD);
 
-//    log_msg("CPU results : total = " + std::to_string(cpu_local_result) +" and the global total = " + std::to_string(cpu_global_result));
+   log_msg("CPU results : total = " + std::to_string(cpu_local_result) +" and the global total = " + std::to_string(cpu_global_result));
 
-//    // Allocate two variables on different ranks
-//    strict_fp_t* gpu_local_result = GDF::malloc_gpu_var<true>(sizeof(strict_fp_t));
-//    strict_fp_t* gpu_global_result = GDF::malloc_gpu_var<true>(sizeof(strict_fp_t));
-//    strict_fp_t* my_vec = GDF::malloc_gpu_var(sizeof(strict_fp_t) * vec_size);
+   // Allocate two variables on different ranks
+   strict_fp_t* gpu_local_result = static_cast<strict_fp_t*>(GDF::malloc_gpu_var<true>(sizeof(strict_fp_t)));
+   strict_fp_t* gpu_global_result = static_cast<strict_fp_t*>(GDF::malloc_gpu_var<true>(sizeof(strict_fp_t)));
+   strict_fp_t* my_vec = static_cast<strict_fp_t*>(GDF::malloc_gpu_var(sizeof(strict_fp_t) * vec_size));
 
-//    GDF::memcpy_gpu_var(my_vec, my_vec_cpu.data(), sizeof(strict_fp_t) * vec_size);
-//    GDF::dot_product(vec_size, my_vec, my_vec, gpu_local_result);
-//    MPI_Allreduce(gpu_local_result, gpu_global_result, 1, MPI_STRICT_FP_T, MPI_SUM, MPI_COMM_WORLD);
+   GDF::memcpy_gpu_var(my_vec, my_vec_cpu.data(), sizeof(strict_fp_t) * vec_size);
+   GDF::dot_product(vec_size, my_vec, my_vec, gpu_local_result);
+   MPI_Allreduce(gpu_local_result, gpu_global_result, 1, MPI_STRICT_FP_T, MPI_SUM, MPI_COMM_WORLD);
 
-//    log_msg("GPU results : local total = " + std::to_string(gpu_local_result[0]) +" and the global total = " + std::to_string(gpu_global_result[0]));
+   log_msg("GPU results : local total = " + std::to_string(gpu_local_result[0]) +" and the global total = " + std::to_string(gpu_global_result[0]));
 
-//    if(a_not_equal_b(cpu_global_result, gpu_global_result[0], test_tol))
-//    {
-//       log_msg<CDF::LogLevel::ERROR>("Error in GPU MPI_Allreduce test!");
-//    }
+   if(a_not_equal_b(cpu_global_result, gpu_global_result[0], test_tol))
+   {
+      log_msg<CDF::LogLevel::ERROR>("Error in GPU MPI_Allreduce test!");
+   }
 
-//    GDF::free_gpu_var(gpu_local_result);
-//    GDF::free_gpu_var(gpu_global_result);
-//    GDF::free_gpu_var(my_vec);
-// }
+   GDF::free_gpu_var(gpu_local_result);
+   GDF::free_gpu_var(gpu_global_result);
+   GDF::free_gpu_var(my_vec);
+}
 
 void backend_testing()
 {
@@ -499,5 +499,5 @@ void backend_testing()
 
     mpi_barrier();
 
-    // test_ncpu_ngpu();
+    test_ncpu_ngpu();
 }

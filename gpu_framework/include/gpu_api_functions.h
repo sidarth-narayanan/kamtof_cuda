@@ -133,50 +133,55 @@ void memcpy_gpu_var(dataSetStorage<T, TYPE, DIMS>& dss_dest,const dataSetStorage
 
 // GPU MATH API FUNCTIONS
 
-// class kg_axpby
-// {
-// public:
-//     kg_axpby(const uint64_t num_elements_in,
-//              const strict_fp_t a_in,
-//              const strict_fp_t* const x_in,
-//              const strict_fp_t b_in,
-//              const strict_fp_t* const y_in,
-//              strict_fp_t* const result_in):
-//         num_elements(num_elements_in),
-//         a(a_in),
-//         x(x_in),
-//         b(b_in),
-//         y(y_in),
-//         result(result_in)
-//     {}
+void init_cublashandle();
 
-//     gdf_kernel void operator()(nd_item<3> itm) const;
+void finalize_cublashandle();
 
-// private:
-//     const uint64_t num_elements;
-//     const strict_fp_t a;
-//     const strict_fp_t* const x;
-//     const strict_fp_t b;
-//     const strict_fp_t* const y;
-//     strict_fp_t* const result;
-// };
 
-// void axpy(const uint64_t num_elements, const strict_fp_t alpha, const strict_fp_t* const x, strict_fp_t* const y, uint8_t impl_type = 0);
+class kg_axpby
+{
+public:
+    kg_axpby(const uint64_t num_elements_in,
+             const strict_fp_t a_in,
+             const strict_fp_t* const x_in,
+             const strict_fp_t b_in,
+             const strict_fp_t* const y_in,
+             strict_fp_t* const result_in):
+        num_elements(num_elements_in),
+        a(a_in),
+        x(x_in),
+        b(b_in),
+        y(y_in),
+        result(result_in)
+    {}
 
-// void dot_product(const uint64_t num_elements, const strict_fp_t * const vec_a, const strict_fp_t * const vec_b, strict_fp_t *result, uint8_t impl_type = 0);
+    gdf_device void operator()(const size_t tid, const size_t stride) const;
 
-// void linf_norm(const uint64_t num_elements, const strict_fp_t* const vec, strict_fp_t * const result);
+private:
+    const uint64_t num_elements;
+    const strict_fp_t a;
+    const strict_fp_t* const x;
+    const strict_fp_t b;
+    const strict_fp_t* const y;
+    strict_fp_t* const result;
+};
 
-// void l0_norm(const uint64_t num_elements, const strict_fp_t* const vec, strict_fp_t * const result);
+void axpy(const uint64_t num_elements, const strict_fp_t alpha, const strict_fp_t* const x, strict_fp_t* const y, uint8_t impl_type = 0);
 
-// void l1_norm(const uint64_t num_elements, const strict_fp_t* const vec, strict_fp_t* const result, uint8_t impl_type = 0);
+void dot_product(const uint64_t num_elements, const strict_fp_t * const vec_a, const strict_fp_t * const vec_b, strict_fp_t *result, uint8_t impl_type = 0);
 
-// void l2_norm(const uint64_t num_elements, const strict_fp_t* const vec, strict_fp_t* const result, uint8_t impl_type = 0);
+void linf_norm(const uint64_t num_elements, const strict_fp_t* const vec, strict_fp_t * const result);
 
-// void csr_matvec(const uint64_t nrow, const uint64_t ncol, const uint64_t nnz, const int* const ia, const int* const ja, const strict_fp_t * const matval, const
-//                 strict_fp_t * const vec, strict_fp_t* const result, const int impl_type = 0);
+void l0_norm(const uint64_t num_elements, const strict_fp_t* const vec, strict_fp_t * const result);
 
-// void gpu_vec_sum(const uint64_t num_elements, const strict_fp_t* const vec, strict_fp_t * const result);
+void l1_norm(const uint64_t num_elements, const strict_fp_t* const vec, strict_fp_t* const result, uint8_t impl_type = 0);
+
+void l2_norm(const uint64_t num_elements, const strict_fp_t* const vec, strict_fp_t* const result, uint8_t impl_type = 0);
+
+void csr_matvec(const uint64_t nrow, const uint64_t ncol, const uint64_t nnz, const int* const ia, const int* const ja, const strict_fp_t * const matval, const
+                strict_fp_t * const vec, strict_fp_t* const result, const int impl_type = 0);
+
+void gpu_vec_sum(const uint64_t num_elements, const strict_fp_t* const vec, strict_fp_t * const result);
 
 void transfer_all_silo_vars_to_cpu(const GDF::transfer_mode_t transfer_mode);
 
@@ -252,6 +257,30 @@ void submit_to_gpu_impl(Us&&... args)
         CUDA_CHECK(cudaDeviceSynchronize());
 }
 
+template<typename Functor, bool async = false, typename... Us>
+void submit_to_gpu_single_block_impl(Us&&... args)
+{
+    callExtractorIfExists<Functor>(args...);
+    Functor obj{gpu_manager->extract_gpu_data_for_kernel(std::forward<Us>(args))...};
+
+    submit_kernel<Functor><<<1, SINGLE_WG_SIZE>>>(obj);
+
+    if constexpr (!async)
+        CUDA_CHECK(cudaDeviceSynchronize());
+}
+
+template<typename Functor, bool async = false, typename... Us>
+void submit_single_impl(Us&&... args)
+{
+    callExtractorIfExists<Functor>(args...);
+    Functor obj{gpu_manager->extract_gpu_data_for_kernel(std::forward<Us>(args))...};
+
+    submit_kernel<Functor><<<1, 1>>>(obj);
+
+    if constexpr (!async)
+        CUDA_CHECK(cudaDeviceSynchronize());
+}
+
 template<typename Functor, typename... Us>
 void submit_to_gpu(Us&&... args)
 {
@@ -262,6 +291,30 @@ template<typename Functor, typename... Us>
 void submit_to_gpu_async(Us&&... args)
 {
     submit_to_gpu_impl<Functor, true>(args...);
+}
+
+template<typename Functor, typename... Us>
+void submit_to_gpu_single_block(Us&&... args)
+{
+    submit_to_gpu_single_block_impl<Functor, false>(args...);
+}
+
+template<typename Functor, typename... Us>
+void submit_to_gpu_single_block_async(Us&&... args)
+{
+    submit_to_gpu_single_block_impl<Functor, true>(args...);
+}
+
+template<typename Functor, typename... Us>
+void submit_single(Us&&... args)
+{
+    submit_single_impl<Functor, false>(args...);
+}
+
+template<typename Functor, typename... Us>
+void submit_single_async(Us&&... args)
+{
+    submit_single_impl<Functor, true>(args...);
 }
 
 } // namespace GDF
