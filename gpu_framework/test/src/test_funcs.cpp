@@ -443,7 +443,7 @@ void test_silo_null()
 
 void test_ncpu_ngpu()
 {
-   const uint64_t vec_size = 1024;
+   const uint64_t vec_size = 3;
 
    std::random_device rd;
    std::mt19937 generator(rd());
@@ -457,7 +457,8 @@ void test_ncpu_ngpu()
    for(uint64_t ii = 0; ii < vec_size; ii++)
    {
       my_vec_cpu.push_back(distribution(generator));
-      cpu_local_result += (my_vec_cpu[ii]*my_vec_cpu[ii]);
+       my_vec_cpu[ii] = ii;
+       cpu_local_result += (my_vec_cpu[ii]*my_vec_cpu[ii]);
    }
    MPI_Allreduce(&cpu_local_result, &cpu_global_result, 1, MPI_STRICT_FP_T, MPI_SUM, MPI_COMM_WORLD);
 

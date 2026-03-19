@@ -36,7 +36,7 @@ void axpy(const size_t num_elements, const strict_fp_t alpha, const strict_fp_t*
     {
     case 0:
     {
-        // oneapi::math::blas::column_major::axpy(GDF::get_gpu_queue(), num_elements, alpha, x, 1, y, 1);
+        cublasDaxpy_64(m_handle, num_elements, &alpha, x, 1, y, 1);
         GDF::gpu_barrier();
         break;
     }
@@ -101,7 +101,7 @@ void dot_product(const size_t num_elements, const strict_fp_t * const vec_a, con
     {
     case 0:
     {
-        // oneapi::math::blas::column_major::dot(GDF::get_gpu_queue(), num_elements, vec_a, 1, vec_b, 1, result);
+        cublasDdot_64(m_handle, num_elements, vec_a, 1, vec_b, 1, result);
         GDF::gpu_barrier();
         break;
     }
@@ -258,7 +258,7 @@ void l1_norm(const size_t num_elements, const strict_fp_t* const vec, strict_fp_
     {
     case 0:
     {
-        // oneapi::math::blas::column_major::asum(GDF::get_gpu_queue(), num_elements, vec, 1, result);
+        cublasDasum_64(m_handle, num_elements, vec, 1, result);
         GDF::gpu_barrier();
         break;
     }
@@ -300,7 +300,7 @@ void l2_norm(const size_t num_elements, const strict_fp_t* const vec, strict_fp_
     {
     case 0:
     {
-        // oneapi::math::blas::column_major::nrm2(GDF::get_gpu_queue(), num_elements, vec, 1, result);
+        cublasDnrm2_64(m_handle, num_elements, vec, 1, result);
         GDF::gpu_barrier();
         break;
     }
