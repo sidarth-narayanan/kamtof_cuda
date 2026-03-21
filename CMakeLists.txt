@@ -74,11 +74,6 @@ else()
    add_executable(solver ${CpuSolverSrcTop})
 endif()
 
-set(NVCC_FLAGS_COMMON --expt-relaxed-constexpr)
-set(NVCC_FLAGS_RELEASE -O3)
-set(NVCC_FLAGS_DEBUG -O0 -G -g)
-set(NVCC_FLAGS_PROF -O3 -lineinfo)
-
 target_compile_options(solver PRIVATE
     # CUDA specific flags
     $<$<COMPILE_LANGUAGE:CUDA>: ${NVCC_FLAGS_COMMON} ${NVCC_FLAGS_${CMAKE_BUILD_TYPE}} -Xcompiler ${CXX_FLAGS_${CMAKE_BUILD_TYPE}}>

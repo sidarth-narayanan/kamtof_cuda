@@ -5,6 +5,9 @@
 
 static cublasHandle_t m_handle;
 
+namespace GDF
+{
+
 void init_cublashandle()
 {
     cublasCreate(&m_handle);
@@ -15,9 +18,6 @@ void finalize_cublashandle()
     cublasDestroy(m_handle);
 }
 
-
-namespace GDF
-{
 
 gdf_device void kg_axpby::operator()(const size_t tid, const size_t stride) const
 {

@@ -39,12 +39,16 @@ void setup_gpu_globals_test()
     // Setup GPU Manager
     assert(!gpu_manager);
     gpu_manager = new GDF::GPUManager_t(4, 256);
+
+    GDF::init_cublashandle();
 }
 
 void finalize_gpu_globals_test()
 {
     assert(gpu_manager);
     GDF::gpu_barrier();
+
+    GDF::finalize_cublashandle();
 
     // Finalize GPU Manager
     delete gpu_manager;
@@ -443,7 +447,7 @@ void test_silo_null()
 
 void test_ncpu_ngpu()
 {
-   const uint64_t vec_size = 3;
+   const uint64_t vec_size = 1024;
 
    std::random_device rd;
    std::mt19937 generator(rd());
@@ -457,7 +461,6 @@ void test_ncpu_ngpu()
    for(uint64_t ii = 0; ii < vec_size; ii++)
    {
       my_vec_cpu.push_back(distribution(generator));
-       my_vec_cpu[ii] = ii;
        cpu_local_result += (my_vec_cpu[ii]*my_vec_cpu[ii]);
    }
    MPI_Allreduce(&cpu_local_result, &cpu_global_result, 1, MPI_STRICT_FP_T, MPI_SUM, MPI_COMM_WORLD);
