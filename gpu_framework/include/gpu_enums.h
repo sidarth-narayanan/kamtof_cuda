@@ -1,5 +1,4 @@
-#ifndef GPU_ENUMS_H
-#define GPU_ENUMS_H
+#pragma once
 
 #include <cstdint> // For uint16_t
 
@@ -62,4 +61,3 @@ enum class xpu_data_status_t : uint8_t
 
 } // GDF
 #endif // ENABLE_GPU
-#endif // GPU_ENUMS_H

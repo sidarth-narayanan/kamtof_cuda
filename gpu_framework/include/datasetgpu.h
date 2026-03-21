@@ -1,5 +1,4 @@
-#ifndef DATASET_GPU_H
-#define DATASET_GPU_H
+#pragma once
 
 #include <cstdint> // For uint32_t
 #include <cstddef> // For size_t
@@ -82,5 +81,3 @@ public:
 };
 
 #include "datasetgpu.hpp"
-
-#endif // DATASET_GPU_H

@@ -1,4 +1,5 @@
 #pragma once
+
 #include "gpu_enums.h"
 
 namespace GDF

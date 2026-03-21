@@ -1,10 +1,4 @@
-/* 
- * Author: Mandhapati Raju <mandhapati.raju@convergecfd.com>
- *
- */
-
-#ifndef MPICLASS_H
-#define MPICLASS_H
+#pragma once
 
 #include <vector>
 #include <array>
@@ -63,6 +57,3 @@ public:
 };
 
 CDF_GLOBAL MpiClass* mpiparams;
-
-#endif /* MPICLASS_H */
-

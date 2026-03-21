@@ -1,5 +1,4 @@
-#ifndef GPU_GLOBALS_H
-#define GPU_GLOBALS_H
+#pragma once
 
 #ifdef GPU_MEM_LOG
 #include <map>
@@ -34,5 +33,3 @@ CDF_GLOBAL std::ofstream gpu_mem_usage_log;
 
 void setup_gpu_globals();
 void finalize_gpu_globals();
-
-#endif // GPU_GLOBALS_H

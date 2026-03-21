@@ -1,5 +1,4 @@
-#ifndef SOLVER_GPU_H
-#define SOLVER_GPU_H
+#pragma once
 
 #include "grid.h"
 
@@ -71,6 +70,3 @@ public:
    strict_fp_t residual_norm;
    strict_fp_t delta_t;
 };
-
-#endif /* SOLVER_GPU_H */
-

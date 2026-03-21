@@ -1,5 +1,4 @@
-#ifndef DATASETBASE_GPU_H
-#define DATASETBASE_GPU_H
+#pragma once
 
 #include <cstdint> // For uint32_t
 #include <cstddef> // For size_t
@@ -78,5 +77,3 @@ public:
    bool is_read_only = false;
 #endif
 };
-
-#endif // DATASETBASE_GPU_H

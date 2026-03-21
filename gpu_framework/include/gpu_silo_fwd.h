@@ -1,5 +1,4 @@
-#ifndef GPU_SILO_FWD_H
-#define GPU_SILO_FWD_H
+#pragma once
 
 #include "cpu_framework_enums.h"
 
@@ -45,5 +44,3 @@ using VectorGPU = dataSetStorageGPU<T, CDF::StorageType::VECTOR, DIMS>;
 
 template <class T, uint8_t DIMS = ZEROD>
 using VectorGPURead = dataSetStorageGPURead<T, CDF::StorageType::VECTOR, DIMS>;
-
-#endif // GPU_SILO_FWD_H

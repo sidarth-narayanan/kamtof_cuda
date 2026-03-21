@@ -1,5 +1,5 @@
-#ifndef INPUT_PARSER_H
-#define INPUT_PARSER_H
+#pragma once
+
 #include <vector>
 #include <string>
 #include "fp_data_types.h"
@@ -52,5 +52,3 @@ public:
 
     std::string input_filename = "NULL"; // default name of input filename                    
 };
-
-#endif /* INPUT_PARSER_H*/

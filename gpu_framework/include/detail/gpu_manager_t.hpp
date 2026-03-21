@@ -1,5 +1,4 @@
-#ifndef GPU_MANAGER_T_HPP
-#define GPU_MANAGER_T_HPP
+#pragma once
 
 #include "gpu_manager_t.h"
 #include "gpu_helpers.h" // For transfer_mode_to_cstr
@@ -182,5 +181,3 @@ GPUInstance_t& GPUManager_t::setup_gpu_instance_and_data_ptr(const dataSetStorag
 }
 
 } // namespace CDF
-
-#endif // GPU_MANAGER_T_HPP

@@ -1,5 +1,4 @@
-#ifndef DATASETSTORAGE_GPU_H
-#define DATASETSTORAGE_GPU_H
+#pragma once
 
 #include "silo_fwd.h" // For DSB and DSS
 #include "datasetbasegpu.h" // For DSBGPU
@@ -78,5 +77,3 @@ public:
     const dataSetBase* cpu_dss_ptr = nullptr;
     const bool m_primary = false;
 };
-
-#endif //DATASETSTORAGE_GPU_H

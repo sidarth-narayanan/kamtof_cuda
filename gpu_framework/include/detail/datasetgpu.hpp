@@ -1,5 +1,4 @@
-#ifndef DATASET_GPU_HPP
-#define DATASET_GPU_HPP
+#pragma once
 
 #include "datasetgpu.h"
 
@@ -23,5 +22,3 @@ size_t dataSetGPU<T, DIMS>::total_num_elements() const
       return this->m_size*this->m_offsets[0];
    }
 }
-
-#endif // DATASET_GPU_HPP

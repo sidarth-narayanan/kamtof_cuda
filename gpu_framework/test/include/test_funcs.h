@@ -1,5 +1,4 @@
-#ifndef TEST_FUNCS_H
-#define TEST_FUNCS_H
+#pragma once
 
 void setup_gpu_globals_test();
 void finalize_gpu_globals_test();
@@ -25,4 +24,3 @@ inline void demonstrate_temp_write()
 {
    return demonstrate_temp_write_impl(false);
 }
-#endif // TEST_FUNCS_H

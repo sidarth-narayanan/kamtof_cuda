@@ -1,5 +1,4 @@
-#ifndef GPU_INSTANCE_T_H
-#define GPU_INSTANCE_T_H
+#pragma once
 
 #include "gpu_enums.h" // For gpu enums xpu_data_status_t, transfer_mode_t and xpu_t
 #include "gpu_silo_fwd.h" // For DSBGPU
@@ -42,5 +41,3 @@ public:
 };
 
 } // namespace GDF
-
-#endif // GPU_INSTANCE_T_H
