@@ -3,7 +3,7 @@
 #include <cstdint> // For uint32_t
 #include <cstddef> // For size_t
 #include <cassert> // For assert
-#include "gpu_enums.h"
+#include "gpu_backend.h"
 
 class dataSetBaseGPU
 {

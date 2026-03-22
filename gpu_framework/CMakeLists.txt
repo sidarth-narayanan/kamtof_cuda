@@ -10,7 +10,10 @@ if(ENABLE_GPU)
    set_source_files_properties(${GpuFrameworkSrcTop} PROPERTIES LANGUAGE CUDA)
 endif()
 
-add_library( gpu_framework ${GpuFrameworkSrcTop} )
+add_library( gpu_framework ${GpuFrameworkSrcTop}
+   include/gpu_backend.h
+   include/cublas_error.h
+   include/cusparse_error.h )
 
 target_include_directories( gpu_framework PUBLIC
    ${GPU_FRAMEWORK_DIR}/include
@@ -20,7 +23,7 @@ target_include_directories( gpu_framework PUBLIC
    $ENV{CPU_FRAMEWORK_DIR}/include/detail
 )
 
-target_link_libraries(gpu_framework MPI::MPI_CXX cublas) # FIXME: Add CUDA here
+target_link_libraries(gpu_framework MPI::MPI_CXX cublas cusparse) # FIXME: Add CUDA here
 
 set(NVCC_FLAGS_COMMON --expt-relaxed-constexpr)
 set(NVCC_FLAGS_RELEASE -O3)

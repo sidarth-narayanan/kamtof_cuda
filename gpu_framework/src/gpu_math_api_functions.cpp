@@ -1,7 +1,8 @@
 #include "gpu_api_functions.h" // For GPU API functions
 #include "gpu_atomics.h" // For GPU Atomics
+#include "sparseSPMV.h"
 
-#include <cublas_v2.h>
+#include "cublas_error.h"
 
 static cublasHandle_t m_handle;
 
@@ -10,12 +11,12 @@ namespace GDF
 
 void init_cublashandle()
 {
-    cublasCreate(&m_handle);
+    CHECK_CUBLAS(cublasCreate(&m_handle))
 }
 
 void finalize_cublashandle()
 {
-    cublasDestroy(m_handle);
+    CHECK_CUBLAS(cublasDestroy(m_handle))
 }
 
 
@@ -36,7 +37,7 @@ void axpy(const size_t num_elements, const strict_fp_t alpha, const strict_fp_t*
     {
     case 0:
     {
-        cublasDaxpy_64(m_handle, num_elements, &alpha, x, 1, y, 1);
+        CHECK_CUBLAS(cublasDaxpy_64(m_handle, num_elements, &alpha, x, 1, y, 1))
         GDF::gpu_barrier();
         break;
     }
@@ -101,7 +102,7 @@ void dot_product(const size_t num_elements, const strict_fp_t * const vec_a, con
     {
     case 0:
     {
-        cublasDdot_64(m_handle, num_elements, vec_a, 1, vec_b, 1, result);
+        CHECK_CUBLAS(cublasDdot_64(m_handle, num_elements, vec_a, 1, vec_b, 1, result))
         GDF::gpu_barrier();
         break;
     }
@@ -258,7 +259,7 @@ void l1_norm(const size_t num_elements, const strict_fp_t* const vec, strict_fp_
     {
     case 0:
     {
-        cublasDasum_64(m_handle, num_elements, vec, 1, result);
+        CHECK_CUBLAS(cublasDasum_64(m_handle, num_elements, vec, 1, result))
         GDF::gpu_barrier();
         break;
     }
@@ -300,7 +301,7 @@ void l2_norm(const size_t num_elements, const strict_fp_t* const vec, strict_fp_
     {
     case 0:
     {
-        cublasDnrm2_64(m_handle, num_elements, vec, 1, result);
+        CHECK_CUBLAS(cublasDnrm2_64(m_handle, num_elements, vec, 1, result))
         GDF::gpu_barrier();
         break;
     }
@@ -366,16 +367,16 @@ void csr_matvec(const size_t nrow, const size_t ncol, const size_t nnz, const in
     {
     case 0:
     {
-        // int* const ia_new = const_cast<int* const>(ia);
-        // int* const ja_new = const_cast<int* const>(ja);
-        // strict_fp_t* const matval_new = const_cast<strict_fp_t* const>(matval);
-        // strict_fp_t* const vec_new = const_cast<strict_fp_t* const>(vec);
-        // oneMathSPMV m_sys;
-        // m_sys.init_system(nrow, ncol, nnz, 1.0, 0.0, ia_new, ja_new, matval_new, vec_new, result);
-        // m_sys.compute();
-        // m_sys.release_system();
+        int* const ia_new = const_cast<int*>(ia);
+        int* const ja_new = const_cast<int*>(ja);
+        strict_fp_t* const matval_new = const_cast<strict_fp_t*>(matval);
+        strict_fp_t* const vec_new = const_cast<strict_fp_t*>(vec);
+        sparseSPMV m_sys;
+        m_sys.init_system(nrow, ncol, nnz, 1.0, 0.0, ia_new, ja_new, matval_new, vec_new, result);
+        m_sys.compute();
+        m_sys.release_system();
         break;
-        log_msg<CDF::LogLevel::ERROR>("Error in GDF::csr_matvec: oneMath isn't available for SpMv yet!");
+        log_msg<CDF::LogLevel::ERROR>("Error in GDF::csr_matvec: cuSparse isn't available for SpMv yet!");
         break;
     }
     case 1:

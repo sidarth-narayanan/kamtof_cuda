@@ -20,9 +20,9 @@ void* malloc_gpu_var(const size_t& num_bytes)
 {
     void* result = nullptr;
     if constexpr(is_malloc_shared)
-        CUDA_CHECK(cudaMallocManaged(&result, num_bytes));
+        CHECK_CUDA(cudaMallocManaged(&result, num_bytes))
     else
-        CUDA_CHECK(cudaMalloc(&result, num_bytes));
+        CHECK_CUDA(cudaMalloc(&result, num_bytes))
 #ifdef GPU_MEM_LOG
     gpu_mem_map.insert({static_cast<void*>(result),num_bytes});
     tot_gpu_mem_used += num_bytes;
@@ -43,7 +43,7 @@ template void* malloc_gpu_var<false>(const size_t& num_bytes);
 static bool is_gpu_ptr(const void* const ptr)
 {
     cudaPointerAttributes m_attr;
-    CUDA_CHECK(cudaPointerGetAttributes(&m_attr, ptr));
+    CHECK_CUDA(cudaPointerGetAttributes(&m_attr, ptr));
     return !(m_attr.type == cudaMemoryType::cudaMemoryTypeUnregistered || m_attr.type == cudaMemoryType::cudaMemoryTypeHost);
 }
 
@@ -70,7 +70,7 @@ void memcpy_gpu_var(void* const dest, const void * const src, const size_t& num_
                 log_error("Trying to do a memcpy between two CPU pointers!!!");
         }
 
-        CUDA_CHECK(cudaMemcpy(dest, src, num_bytes, cudaMemcpyKind::cudaMemcpyDefault));
+        CHECK_CUDA(cudaMemcpy(dest, src, num_bytes, cudaMemcpyKind::cudaMemcpyDefault));
     }
 }
 
@@ -96,7 +96,7 @@ void free_gpu_var(void* gpu_var)
     gpu_mem_map.erase(gpu_var);
 #endif
     assert(gpu_var);
-    CUDA_CHECK(cudaFree(gpu_var));
+    CHECK_CUDA(cudaFree(gpu_var));
 }
 
 // API Function for memeset
@@ -104,7 +104,7 @@ void free_gpu_var(void* gpu_var)
 void memset_gpu_var(void* gpu_var, const int val, const size_t& num_bytes)
 {
     assert(gpu_var);
-    CUDA_CHECK(cudaMemset(gpu_var, val, num_bytes));
+    CHECK_CUDA(cudaMemset(gpu_var, val, num_bytes));
 }
 
 void transfer_to_gpu(const dataSetBase* const dsb_entry, transfer_mode_t transfer_mode)

@@ -4,7 +4,6 @@
 #include "gpu_atomics.h" // For atomics
 #include "gpu_api_functions.h"
 
-
 gdf_device void kg_scale_pressure_and_change_scale::operator() (const size_t tid, const size_t stride) const
 {
     if(tid < pressure.size())
@@ -62,7 +61,7 @@ gdf_device void kg_norm2::operator() (const size_t tid, const size_t stride) con
     if(tid < size)
         vec[tid] = sum;
 
-    sync_threads();
+    GDF::sync_threads();
 
     if(tid == 0)
     {

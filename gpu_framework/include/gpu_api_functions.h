@@ -5,6 +5,8 @@
 #include "gpu_atomics.h" // For GPU atomics
 #include "silo.h"
 #include "datasetstoragegpu.h"
+#include "gpu_backend.h"
+#include "cublas_error.h"
 
 namespace GDF
 {
@@ -79,7 +81,14 @@ void transfer_to_cpu_syncandmove(Types& ... dss_objs)
 // Device wide barrier
 inline void gpu_barrier()
 {
-    CUDA_CHECK(cudaDeviceSynchronize());
+    CHECK_CUDA(cudaDeviceSynchronize());
+}
+
+gdf_kernel inline void sync_threads()
+{
+#if defined(DEVICE_COMPILE)
+    __syncthreads();
+#endif
 }
 
 // Allocates a gpu variable with given number of elements either in shared or device mode
@@ -254,7 +263,7 @@ void submit_to_gpu_impl(Us&&... args)
     submit_kernel<Functor><<<gpu_manager->grid, gpu_manager->block>>>(obj);
 
     if constexpr (!async)
-        CUDA_CHECK(cudaDeviceSynchronize());
+        CHECK_CUDA(cudaDeviceSynchronize());
 }
 
 template<typename Functor, bool async = false, typename... Us>
@@ -266,7 +275,7 @@ void submit_to_gpu_single_block_impl(Us&&... args)
     submit_kernel<Functor><<<1, SINGLE_WG_SIZE>>>(obj);
 
     if constexpr (!async)
-        CUDA_CHECK(cudaDeviceSynchronize());
+        CHECK_CUDA(cudaDeviceSynchronize());
 }
 
 template<typename Functor, bool async = false, typename... Us>
@@ -278,7 +287,7 @@ void submit_single_impl(Us&&... args)
     submit_kernel<Functor><<<1, 1>>>(obj);
 
     if constexpr (!async)
-        CUDA_CHECK(cudaDeviceSynchronize());
+        CHECK_CUDA(cudaDeviceSynchronize());
 }
 
 template<typename Functor, typename... Us>

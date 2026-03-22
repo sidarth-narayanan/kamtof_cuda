@@ -13,8 +13,7 @@
 #include "fp_data_types.h"
 
 #include "gpu_api_functions.h"
-#include "oneMathSPMV.h"
-#include "oneapi/math/blas.hpp"
+#include "sparseSPMV.h"
 
 static void mpi_nbnb_transfer_gpu(strict_fp_t *vec);
 
@@ -22,7 +21,7 @@ Solver_base_gpu::Solver_base_gpu()
 {
    residual_norm = 1e30;
 
-   m_spmv_sys = new GDF::oneMathSPMV();
+   m_spmv_sys = new GDF::sparseSPMV();
 }
 
 void Solver_base_gpu::allocate_variables()

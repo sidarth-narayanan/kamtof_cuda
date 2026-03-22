@@ -8,19 +8,7 @@
 #include "gpu_silo_fwd.h" // For DSSGPURead
 #include "logger.hpp"
 #include "cpu_globals.h"
-
-// FIXME: Move this to a seperate header
-#define CUDA_CHECK(call)                                                   \
-do {                                                                       \
-        cudaError_t err = (call);                                              \
-        if (err != cudaSuccess) {                                              \
-            fprintf(stderr,                                                    \
-                    "CUDA error at %s:%d: %s (%d)\n",                          \
-                    __FILE__, __LINE__,                                        \
-                    cudaGetErrorString(err), err);                             \
-            std::exit(EXIT_FAILURE);                                           \
-    }                                                                      \
-} while (0)
+#include "gpu_backend.h"
 
 namespace GDF
 {
@@ -38,13 +26,13 @@ public:
       HtoD_memcpy_counter(0), DtoH_memcpy_counter(0), DtoD_memcpy_counter(0)
    {
        int DevCount = -1;
-       CUDA_CHECK(cudaGetDeviceCount(&DevCount));
+       CHECK_CUDA(cudaGetDeviceCount(&DevCount));
        assert(DevCount >= 0);
        if(local_numprocs > DevCount)
            log_msg("Number of ranks > number of GPUs!!!!!!");
        int m_dev = local_rank % DevCount;
-       CUDA_CHECK(cudaSetDevice(m_dev));
-       CUDA_CHECK(cudaGetDeviceProperties(&m_prop, m_dev));
+       CHECK_CUDA(cudaSetDevice(m_dev))
+       CHECK_CUDA(cudaGetDeviceProperties(&m_prop, m_dev))
 
        m_device_name = m_prop.name;
 
