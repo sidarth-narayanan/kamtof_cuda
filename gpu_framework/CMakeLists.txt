@@ -10,10 +10,7 @@ if(ENABLE_GPU)
    set_source_files_properties(${GpuFrameworkSrcTop} PROPERTIES LANGUAGE CUDA)
 endif()
 
-add_library( gpu_framework ${GpuFrameworkSrcTop}
-   include/gpu_backend.h
-   include/cublas_error.h
-   include/cusparse_error.h )
+add_library( gpu_framework ${GpuFrameworkSrcTop})
 
 target_include_directories( gpu_framework PUBLIC
    ${GPU_FRAMEWORK_DIR}/include
