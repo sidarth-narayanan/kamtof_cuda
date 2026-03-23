@@ -8,29 +8,41 @@ project( "Laplace solver using KAMTOF" LANGUAGES CXX VERSION 0.0.1)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-include(kamtof_enable_cuda_for_target)
-
 # Pass the Device flag to the solver source code
 if(NOT DEFINED ENABLE_GPU) # By default build the ENABLE GPU ON VERSION
    set(ENABLE_GPU ON)
 endif()
 
-if (ENABLE_GPU)
+find_package (MPI REQUIRED)
+
+# Build in release mode by default
+if( CMAKE_BUILD_TYPE STREQUAL "" )
+   set( CMAKE_BUILD_TYPE Release )
+endif()
+
+set( CXX_FLAGS_RELEASE " -O3 -DNDEBUG -Werror" )
+set( CXX_FLAGS_DEBUG   "-g -O0 -fno-inline-functions -Wunused-result" )
+set( CXX_FLAGS_ASAN    "-g -O3 -DNDEBUG -fsanitize=address -fno-omit-frame-pointer " )
+set( CXX_FLAGS_RELWITHDEBINFO    "-g -O3 -DNDEBUG " )
+
+if(ENABLE_GPU)
+    set(NVCC_FLAGS_COMMON --expt-relaxed-constexpr)
+    set(NVCC_FLAGS_RELEASE -O3)
+    set(NVCC_FLAGS_DEBUG -O0 -G -g)
+    set(NVCC_FLAGS_PROF -O3 -lineinfo)
+
+    if(NOT CMAKE_CUDA_ARCHITECTURES)
+        set(CMAKE_CUDA_ARCHITECTURES 86)
+    endif()
+
+    set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
+    set(CMAKE_CUDA_HOST_COMPILER ${CXX})
    add_definitions(-DENABLE_GPU)
    enable_language(CUDA)
    set(CMAKE_CUDA_ARCHITECTURES 86)
    set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
    message(STATUS "Buidling for the following CUDA architecture: ${CMAKE_CUDA_ARCHITECTURES}")
-endif()
-
-find_package (MPI REQUIRED)
-if(ENABLE_GPU)
    find_package(CUDAToolkit REQUIRED)
-endif()
-
-# Build in release mode by default
-if( CMAKE_BUILD_TYPE STREQUAL "" )
-   set( CMAKE_BUILD_TYPE Release )
 endif()
 
 # Build the XDF tests by default
