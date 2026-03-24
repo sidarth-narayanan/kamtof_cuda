@@ -1,5 +1,4 @@
-#ifndef SOLVER_H
-#define SOLVER_H
+#pragma once
 
 #include "grid.h"
 #include "mpiclass.h"
@@ -64,6 +63,3 @@ public:
    strict_fp_t residual_norm;
    strict_fp_t delta_t;
 };
-
-#endif /* SOLVER_H */
-

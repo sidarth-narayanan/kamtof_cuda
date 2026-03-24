@@ -1,5 +1,4 @@
-#ifndef TEST_KERNELS_H
-#define TEST_KERNELS_H
+#pragma once
 
 #include "datasetstoragegpu.h" // For DSSGPU
 #include "gpu_enums.h" // For GDF namespace
@@ -15,7 +14,7 @@ public:
       scale(scale_in)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   gdf_device void operator() (const size_t tid, const size_t stride) const;
 
    template<uint8_t N>
    void transfer_vars_to_gpu()
@@ -39,7 +38,7 @@ public:
       R(R_in)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   gdf_device void operator() (const size_t tid, const size_t stride) const;
 
    template<uint8_t N>
    void transfer_vars_to_gpu()
@@ -66,7 +65,7 @@ public:
       R(R_in)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   gdf_device void operator() (const size_t tid, const size_t stride) const;
 
    template<uint8_t N>
    void transfer_vars_to_gpu()
@@ -88,7 +87,7 @@ public:
    kg_test_kernel(const int xx, const strict_fp_t yy):x(xx), y(yy)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   gdf_device void operator() (const size_t tid, const size_t stride) const;
 
    template<uint8_t N>
    void transfer_vars_to_gpu()
@@ -98,7 +97,7 @@ public:
 
 private:
    int x;
-   strict_fp_t y;
+   mutable strict_fp_t y;
 
 };
 
@@ -109,7 +108,7 @@ public:
       velocity(velocity_in), init_val_x(init_val_x_in), init_val_y(init_val_y_in), init_val_z(init_val_z_in)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   gdf_device void operator() (const size_t tid, const size_t stride) const;
 
    template<uint8_t N>
    void transfer_vars_to_gpu()
@@ -132,7 +131,7 @@ public:
       size(size_in)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   gdf_device void operator() (const size_t tid, const size_t stride) const;
 
 private:
    strict_fp_t* vec;
@@ -148,7 +147,7 @@ public:
       size(size_in)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   gdf_device void operator() (const size_t tid, const size_t stride) const;
 
 private:
    strict_fp_t* result;
@@ -165,7 +164,7 @@ public:
       gpu_subtract_val(subtract_val)
    {}
 
-   SYCL_EXTERNAL void operator() (sycl::nd_item<3> itm) const;
+   gdf_device void operator() (const size_t tid, const size_t stride) const;
 
    template<uint8_t N>
    void transfer_vars_to_gpu()
@@ -178,5 +177,3 @@ private:
    mutable CellGPU<strict_fp_t> gpu_silo_null;
    const strict_fp_t gpu_subtract_val;
 };
-
-#endif // TESTS_KERNELS_h

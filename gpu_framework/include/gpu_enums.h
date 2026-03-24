@@ -1,26 +1,10 @@
-#ifndef GPU_ENUMS_H
-#define GPU_ENUMS_H
+#pragma once
 
 #include <cstdint> // For uint16_t
 
+#ifdef ENABLE_GPU
 namespace  GDF
 {
-
-enum class sycl_device_vendor_t : uint8_t // Used to identify the SYCL device vendor
-{
-   AMD,
-   INTEL,
-   NVIDIA,
-   OTHER
-};
-
-enum class sycl_device_t : uint8_t // Used to select the type of device to run the SYCL kernels
-{
-   CPU,
-   GPU,
-   ACCELERATOR,
-   DEFAULT
-};
 
 enum class xpu_t : uint8_t // Used to reference the device (xpu) type for returning xpu_data_status_t
 {
@@ -56,5 +40,4 @@ enum class xpu_data_status_t : uint8_t
 #define GZ 0 // Index used for getting object from GPU device pointers. Mainly useful for scalars
 
 } // GDF
-
-#endif // GPU_ENUMS_H
+#endif // ENABLE_GPU

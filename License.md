@@ -1,3 +1,5 @@
+License inherited from Convergent Science Inc's KAMTOF repository (https://github.com/ConvergentScience/KAMTOF?tab=License-1-ov-file#readme)
+
 **NON-COMMERCIAL SOFTWARE LICENSE AGREEMENT**
 
 The following license governs Your non-commercial use of the Software.  Commercial use is strictly prohibited.

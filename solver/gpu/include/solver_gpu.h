@@ -1,5 +1,4 @@
-#ifndef SOLVER_GPU_H
-#define SOLVER_GPU_H
+#pragma once
 
 #include "grid.h"
 
@@ -12,7 +11,7 @@
 #include "silo_fwd.h"
 #include "fp_data_types.h"
 
-#include "oneMathSPMV.h"
+#include "sparseSPMV.h"
 
 class Solver_base_gpu
 {
@@ -62,7 +61,7 @@ public:
       m_spmv_sys  = nullptr;
    }
 
-   struct GDF::oneMathSPMV* m_spmv_sys;
+   struct GDF::sparseSPMV* m_spmv_sys;
 
    int nnz_local;
    int nrow_local;
@@ -71,6 +70,3 @@ public:
    strict_fp_t residual_norm;
    strict_fp_t delta_t;
 };
-
-#endif /* SOLVER_GPU_H */
-

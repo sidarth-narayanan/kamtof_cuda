@@ -1,5 +1,4 @@
-#ifndef EXTRACTOR_HPP
-#define EXTRACTOR_HPP
+#pragma once
 
 #include "cpu_framework_enums.h"
 #include "fp_data_types.h"
@@ -10,9 +9,9 @@ namespace  CDF
 template<typename Type>
 struct extractor_impl
 {
-   constexpr static PODType PODType()
+   constexpr static POD_t PODType()
    {
-      return PODType::UNSUPPORTED_TYPE;
+      return POD_t::UNSUPPORTED_TYPE;
    }
 
    constexpr static uint32_t single_element_byte_size()
@@ -24,9 +23,9 @@ struct extractor_impl
 template<>
 struct extractor_impl<int8_t>
 {
-   constexpr static PODType PODType()
+   constexpr static POD_t PODType()
    {
-      return PODType::INT8;
+      return POD_t::INT8;
    }
 
    constexpr static uint32_t single_element_byte_size()
@@ -38,9 +37,9 @@ struct extractor_impl<int8_t>
 template<>
 struct extractor_impl<int16_t>
 {
-   constexpr static PODType PODType()
+   constexpr static POD_t PODType()
    {
-      return PODType::INT16;
+      return POD_t::INT16;
    }
 
    constexpr static uint32_t single_element_byte_size()
@@ -52,9 +51,9 @@ struct extractor_impl<int16_t>
 template<>
 struct extractor_impl<int32_t>
 {
-   constexpr static PODType PODType()
+   constexpr static POD_t PODType()
    {
-      return PODType::INT32;
+      return POD_t::INT32;
    }
 
    constexpr static uint32_t single_element_byte_size()
@@ -66,9 +65,9 @@ struct extractor_impl<int32_t>
 template<>
 struct extractor_impl<int64_t>
 {
-   constexpr static PODType PODType()
+   constexpr static POD_t PODType()
    {
-      return PODType::INT64;
+      return POD_t::INT64;
    }
 
    constexpr static uint32_t single_element_byte_size()
@@ -80,9 +79,9 @@ struct extractor_impl<int64_t>
 template<>
 struct extractor_impl<uint8_t>
 {
-   constexpr static PODType PODType()
+   constexpr static POD_t PODType()
    {
-      return PODType::UINT8;
+      return POD_t::UINT8;
    }
 
    constexpr static uint32_t single_element_byte_size()
@@ -94,9 +93,9 @@ struct extractor_impl<uint8_t>
 template<>
 struct extractor_impl<uint16_t>
 {
-   constexpr static PODType PODType()
+   constexpr static POD_t PODType()
    {
-      return PODType::UINT16;
+      return POD_t::UINT16;
    }
 
    constexpr static uint32_t single_element_byte_size()
@@ -108,9 +107,9 @@ struct extractor_impl<uint16_t>
 template<>
 struct extractor_impl<uint32_t>
 {
-   constexpr static PODType PODType()
+   constexpr static POD_t PODType()
    {
-      return PODType::UINT32;
+      return POD_t::UINT32;
    }
 
    constexpr static uint32_t single_element_byte_size()
@@ -122,9 +121,9 @@ struct extractor_impl<uint32_t>
 template<>
 struct extractor_impl<uint64_t>
 {
-   constexpr static PODType PODType()
+   constexpr static POD_t PODType()
    {
-      return PODType::UINT64;
+      return POD_t::UINT64;
    }
 
    constexpr static uint32_t single_element_byte_size()
@@ -136,9 +135,9 @@ struct extractor_impl<uint64_t>
 template<>
 struct extractor_impl<fp32_t>
 {
-   constexpr static PODType PODType()
+   constexpr static POD_t PODType()
    {
-      return PODType::FP32;
+      return POD_t::FP32;
    }
 
    constexpr static uint32_t single_element_byte_size()
@@ -150,9 +149,9 @@ struct extractor_impl<fp32_t>
 template<>
 struct extractor_impl<fp64_t>
 {
-   constexpr static PODType PODType()
+   constexpr static POD_t PODType()
    {
-      return PODType::FP64;
+      return POD_t::FP64;
    }
 
    constexpr static uint32_t single_element_byte_size()
@@ -164,7 +163,7 @@ struct extractor_impl<fp64_t>
 template<typename Type>
 struct extractor
 {
-   constexpr static PODType PODType()
+   constexpr static POD_t PODType()
    {
       return extractor_impl<Type>::PODType();
    }
@@ -178,5 +177,3 @@ struct extractor
 };
 
 } // namespace CDF
-
-#endif // EXTRACTOR_HPP

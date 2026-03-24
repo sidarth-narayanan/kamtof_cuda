@@ -1,5 +1,4 @@
-#ifndef GRID_H
-#define GRID_H
+#pragma once
 
 #include <vector>
 #include <array>
@@ -40,6 +39,3 @@ public:
 };
 
 void mpi_nbnb_transfer(strict_fp_t *vec);
-
-#endif /* GRID_H */
-

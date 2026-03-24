@@ -11,7 +11,7 @@
 #include <limits>
 
 template <CDF::StorageType TYPE>
-void silo::resize(const uint64_t& new_size)
+void silo::resize(const size_t& new_size)
 {
    static_assert(TYPE < CDF::StorageType::NUM_STORAGE_TYPES, "Global silo resize needs a valid StorageType");
    static_assert(TYPE != CDF::StorageType::VECTOR, "Global silo size cannot be set for Vector variables");

@@ -1,5 +1,4 @@
-#ifndef GPU_HELPERS_H
-#define GPU_HELPERS_H
+#pragma once
 
 #include <cstdint> // For uint8_t
 
@@ -14,5 +13,3 @@ const char* transfer_mode_to_cstr(transfer_mode_t transfer_mode);
 const char* xpu_data_status_to_cstr(xpu_data_status_t data_status);
 
 } // namespace GDF
-
-#endif // GPU_HELPERS_H

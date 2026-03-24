@@ -18,7 +18,7 @@ enum class StorageType : uint8_t
    NUM_STORAGE_TYPES
 };
 
-enum class PODType : uint8_t
+enum class POD_t : uint8_t
 {
    INT8 = 0,
    INT16,

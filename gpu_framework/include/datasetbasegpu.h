@@ -1,9 +1,9 @@
-#ifndef DATASETBASE_GPU_H
-#define DATASETBASE_GPU_H
+#pragma once
 
 #include <cstdint> // For uint32_t
 #include <cstddef> // For size_t
 #include <cassert> // For assert
+#include "gpu_backend.h"
 
 class dataSetBaseGPU
 {
@@ -28,12 +28,12 @@ public:
 
    ~dataSetBaseGPU(){}
 
-   void* void_data()
+   gdf_kernel void* void_data()
    {
       return m_gpu_data;
    }
 
-   const void* void_data() const
+   gdf_kernel const void* void_data() const
    {
       return m_gpu_data;
    }
@@ -43,12 +43,12 @@ public:
       m_gpu_data = data;
    }
 
-   const uint32_t* offsets() const
+   gdf_kernel const uint32_t* offsets() const
    {
       return m_offsets;
    }
 
-   const uint8_t num_offsets() const
+   gdf_kernel uint8_t num_offsets() const
    {
       return m_num_offsets;
    }
@@ -58,7 +58,7 @@ public:
       m_size = size_in;
    }
 
-   const size_t size() const
+   gdf_kernel size_t size() const
    {
       return m_size;
    }
@@ -77,5 +77,3 @@ public:
    bool is_read_only = false;
 #endif
 };
-
-#endif // DATASETBASE_GPU_H
