@@ -84,7 +84,7 @@ inline void gpu_barrier()
     CHECK_CUDA(cudaDeviceSynchronize());
 }
 
-gdf_kernel inline void sync_threads()
+__device__ inline void sync_threads()
 {
 #if defined(DEVICE_COMPILE)
     __syncthreads();
@@ -164,7 +164,7 @@ public:
         result(result_in)
     {}
 
-    gdf_device void operator()(const size_t tid, const size_t stride) const;
+    __device__ void operator()(const size_t tid, const size_t stride) const;
 
 private:
     const uint64_t num_elements;

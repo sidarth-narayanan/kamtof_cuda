@@ -54,10 +54,8 @@ public:
       gpu_Q_boundary(Q_boundary)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for(int i = gpu_start_idx+idx; i < gpu_end_idx; i += stride)
       {
          gpu_Q_boundary[i] = gpu_QL;
@@ -119,10 +117,8 @@ public:
       gpu_Q_cell(Q_cell)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for(int i = idx; i < gpu_num_solved; i += stride)
       {
          gpu_Q_cell[i] = gpu_Q_initial;
@@ -167,10 +163,8 @@ public:
       gpu_Q_cell(Q_cell)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for (unsigned int i = idx; i < gpu_num_solved; i += stride)
       {
          gpu_Q_cell[i] -= gpu_residual[i] * gpu_delta_t / gpu_volume[i];
@@ -203,10 +197,8 @@ public:
       gpu_Q_cell(Q_cell)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for (unsigned int i = idx; i < gpu_num_solved; i += stride)
       {
          gpu_Q_cell[i] += gpu_dQ[i];
@@ -355,10 +347,8 @@ public:
       gpu_dQ(dQ)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for(unsigned int i = idx; i < gpu_num_solved; i += stride)
       {
          strict_fp_t temp = gpu_rhs[i];
@@ -402,7 +392,7 @@ void Solver_base_gpu::jacobi_linear_solver(const int num_solved)
    Cell<strict_fp_t> dQ_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("dQ_local");
    
    GDF::transfer_to_gpu_noinit(dQ_old_local);
-   GDF::memset_gpu_var(dQ_old_local.gpu_data(), 0, num_solved);
+   GDF::memset_gpu_var(dQ_old_local.gpu_data(), 0, sizeof(strict_fp_t) * num_solved);
 
    for (unsigned int iter = 0; iter < num_iter; iter++)
    {
@@ -417,7 +407,7 @@ void Solver_base_gpu::jacobi_linear_solver(const int num_solved)
                                                   dQ_local);
       
       
-      GDF::memcpy_gpu_var(dQ_old_local.gpu_data(), dQ_local.gpu_data(), sizeof(decltype(dQ_old_local[0])) * num_solved);
+      GDF::memcpy_gpu_var(dQ_old_local.gpu_data(), dQ_local.gpu_data(), sizeof(strict_fp_t) * num_solved);
    }
 }
 
@@ -443,10 +433,10 @@ void Solver_base_gpu::sparse_matvec(strict_fp_t* const vec_in, strict_fp_t* cons
 {
    mpi_nbnb_transfer_gpu(vec_in);
    assert(m_spmv_sys && m_spmv_sys->is_setup());
-   strict_fp_t* const x = const_cast<strict_fp_t* const>(vec_in);
-   strict_fp_t* const y = const_cast<strict_fp_t* const>(vec_out);
-   m_spmv_sys->update_x(ncol_local, x);
-   m_spmv_sys->update_y(nrow_local, y);
+   strict_fp_t* x = const_cast<strict_fp_t*>(vec_in);
+   strict_fp_t* y = const_cast<strict_fp_t*>(vec_out);
+   m_spmv_sys->update_x(x);
+   m_spmv_sys->update_y(y);
    m_spmv_sys->compute();
 }
 
@@ -455,8 +445,7 @@ void Solver_base_gpu::dot_product(const size_t num_elements, const strict_fp_t* 
    assert(x);
    assert(y);
 
-   oneapi::math::blas::column_major::dot(GDF::get_gpu_queue(), num_elements, x, 1, y, 1, result);
-   // GDF::gpu_barrier();
+   GDF::dot_product(num_elements, x, y, result);
    MPI_Allreduce(result, result, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 }
 
@@ -477,10 +466,8 @@ public:
       gpu_result(result)
    {}
 
-   void operator()(nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for(int ii = idx; ii < gpu_size; ii += stride)
       {
          gpu_result[ii] = gpu_a*gpu_x[ii] + gpu_b*gpu_y[ii];
@@ -511,10 +498,8 @@ public:
       gpu_result(result)
    {}
 
-   void operator()(nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for(int ii = idx; ii < gpu_size; ii += stride)
       {
          gpu_result[ii] = gpu_x[ii] + gpu_b*gpu_y[ii];
@@ -535,42 +520,42 @@ void Solver_base_gpu::bicgstab_linear_solver()
    Cell<strict_fp_t> dQ_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("dQ_local");
 
    GDF::transfer_to_gpu_noinit(dQ_local);
-   GDF::memset_gpu_var(dQ_local.gpu_data(), 0, nrow_local);
+   GDF::memset_gpu_var(dQ_local.gpu_data(), 0, sizeof(strict_fp_t) * nrow_local);
 
    //Memory Allocations
-   strict_fp_t* const r0 = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
-   strict_fp_t* const r  = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
-   strict_fp_t* const p  = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
-   strict_fp_t* const Ap = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
-   strict_fp_t* const s  = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
-   strict_fp_t* const As = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
+   strict_fp_t* const r0 = static_cast<strict_fp_t*>(GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local));
+   strict_fp_t* const r  = static_cast<strict_fp_t*>(GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local));
+   strict_fp_t* const p  = static_cast<strict_fp_t*>(GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local));
+   strict_fp_t* const Ap = static_cast<strict_fp_t*>(GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local));
+   strict_fp_t* const s  = static_cast<strict_fp_t*>(GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local));
+   strict_fp_t* const As = static_cast<strict_fp_t*>(GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local));
 
-   strict_fp_t* const p1 = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
-   strict_fp_t* const s1 = GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local);
+   strict_fp_t* const p1 = static_cast<strict_fp_t*>(GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local));
+   strict_fp_t* const s1 = static_cast<strict_fp_t*>(GDF::malloc_gpu_var(sizeof(strict_fp_t) * ncol_local));
 
    //Constants
-   strict_fp_t* const alpha1 = GDF::malloc_gpu_var<true>(sizeof(strict_fp_t));
-   strict_fp_t* const omega1 = GDF::malloc_gpu_var<true>(sizeof(strict_fp_t));
+   strict_fp_t* const alpha1 = static_cast<strict_fp_t*>(GDF::malloc_gpu_var<true>(sizeof(strict_fp_t)));
+   strict_fp_t* const omega1 = static_cast<strict_fp_t*>(GDF::malloc_gpu_var<true>(sizeof(strict_fp_t)));
    
-   strict_fp_t* const alpha = GDF::malloc_gpu_var<true>(sizeof(strict_fp_t));
-   strict_fp_t* const beta = GDF::malloc_gpu_var<true>(sizeof(strict_fp_t));
+   strict_fp_t* const alpha = static_cast<strict_fp_t*>(GDF::malloc_gpu_var<true>(sizeof(strict_fp_t)));
+   strict_fp_t* const beta = static_cast<strict_fp_t*>(GDF::malloc_gpu_var<true>(sizeof(strict_fp_t)));
 
-   strict_fp_t* const temp = GDF::malloc_gpu_var<true>(sizeof(strict_fp_t));
+   strict_fp_t* const temp = static_cast<strict_fp_t*>(GDF::malloc_gpu_var<true>(sizeof(strict_fp_t)));
 
    // r0 = b-Ax
-   strict_fp_t* const Ax = GDF::malloc_gpu_var(sizeof(strict_fp_t)* nrow_local);
+   strict_fp_t* const Ax = static_cast<strict_fp_t*>(GDF::malloc_gpu_var(sizeof(strict_fp_t)* nrow_local));
    sparse_matvec(dQ_local.gpu_data(), Ax);
    GDF::submit_to_gpu<kg_bicgstab_xpby>(nrow_local, rhs_local.gpu_data(), -1.0, Ax, r0);
    GDF::free_gpu_var(Ax);
 
    // r = r0, p = r0
-   GDF::memcpy_gpu_var(r, r0, nrow_local);
-   GDF::memcpy_gpu_var(p, r0, nrow_local);
+   GDF::memcpy_gpu_var(r, r0, sizeof(strict_fp_t) * nrow_local);
+   GDF::memcpy_gpu_var(p, r0, sizeof(strict_fp_t) * nrow_local);
 
    for(int iter = 0; iter < num_iter; iter++)
    {
       // p1 = p
-      GDF::memcpy_gpu_var(p1, p, nrow_local);
+      GDF::memcpy_gpu_var(p1, p, sizeof(strict_fp_t) * nrow_local);
 
       // alpha1 = r . r0
       dot_product(nrow_local, r, r0, alpha1);
@@ -587,7 +572,7 @@ void Solver_base_gpu::bicgstab_linear_solver()
       GDF::submit_to_gpu<kg_bicgstab_xpby>(nrow_local, r, -alpha[0], Ap, s);
 
       // s1 = s
-      GDF::memcpy_gpu_var(s1, s, nrow_local);
+      GDF::memcpy_gpu_var(s1, s, sizeof(strict_fp_t) * nrow_local);
 
       // As = A * s1
       sparse_matvec(s1, As);
@@ -717,10 +702,8 @@ public:
       gpu_buf(buf)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for(int ii = idx; ii < gpu_num_elements; ii += stride)
       {
          gpu_buf[ii] = gpu_vec[gpu_list[ii]];
@@ -753,10 +736,8 @@ public:
       gpu_vec(vec)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for(int ii = idx; ii < gpu_num_elements; ii += stride)
       {
          gpu_vec[gpu_list[ii]] = gpu_buf[ii];
@@ -802,10 +783,8 @@ public:
       gpu_data(data)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for (int il = idx; il < gpu_num_solved; il += stride)
       {
          for (unsigned int jl = gpu_number_of_neighbors[il]; jl < gpu_number_of_neighbors[il + 1]; jl++)
@@ -842,10 +821,8 @@ public:
       gpu_data(data)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for(unsigned int i = idx; i < gpu_num_boundary_faces; i += stride)
       {
          const int cell = gpu_boundary_face_to_cell[i];
@@ -880,10 +857,8 @@ public:
       gpu_data_min(data_min)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for(unsigned int il = idx; il < gpu_num_solved; il += stride)
       {
          gpu_data[il] = gpu_data[il] / (gpu_volume[il] * 2);
@@ -906,8 +881,8 @@ private:
 
 void Solver_base_gpu::compute_time_step(const int num_solved, const int num_attached)
 {
-   strict_fp_t* data = GDF::malloc_gpu_var(sizeof(strict_fp_t) * num_solved);
-   GDF::memset_gpu_var(data, 0, num_solved);
+   strict_fp_t* data = static_cast<strict_fp_t*>(GDF::malloc_gpu_var(sizeof(strict_fp_t) * num_solved));
+   GDF::memset_gpu_var(data, 0, sizeof(strict_fp_t) * num_solved);
 
    VectorRead<int> number_of_neighbors_local = m_silo.retrieve_entry<int, CDF::StorageType::VECTOR>("number_of_neighbors_local");
    FaceRead<strict_fp_t> area_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::FACE>("area_local");
@@ -925,7 +900,7 @@ void Solver_base_gpu::compute_time_step(const int num_solved, const int num_atta
                                                   boundary_area_local,
                                                   data);
    
-   strict_fp_t* min_value = GDF::malloc_gpu_var<true>(sizeof(strict_fp_t) * 1);
+   strict_fp_t* min_value = static_cast<strict_fp_t*>(GDF::malloc_gpu_var<true>(sizeof(strict_fp_t) * 1));
    min_value[0] = 1.e30;
 
    CellRead<strict_fp_t> volume_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("volume_local");
@@ -969,10 +944,8 @@ public:
       gpu_rdista(rdista)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for(unsigned int il = idx; il < gpu_num_solved; il += stride)
       {
          for (int jl = gpu_number_of_neighbors[il]; jl < gpu_number_of_neighbors[il + 1]; jl++)
@@ -1031,10 +1004,8 @@ public:
       gpu_boundary_rdista(boundary_rdista)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for(unsigned int i = idx; i < gpu_boundary_faces; i += stride)
       {
          const int cell = gpu_boundary_face_to_cell[i];
@@ -1122,10 +1093,8 @@ public:
       gpu_residual(residual)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for (unsigned int il = idx; il < gpu_num_solved; il += stride)
       {
          gpu_residual[il] = 0.0;
@@ -1172,10 +1141,8 @@ public:
       gpu_residual(residual)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for (unsigned int i = idx; i < gpu_num_boundary_faces; i += stride)
       {
          const int cell = gpu_boundary_face_to_cell[i];
@@ -1213,10 +1180,8 @@ public:
       gpu_residual_norm(residual_norm)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for (unsigned int i = idx; i < gpu_num_solved; i += stride)
       {
          GDF::atomic_add(gpu_residual_norm[0], fabs(gpu_residual[i]));
@@ -1246,10 +1211,8 @@ public:
       gpu_rhs(rhs)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for (unsigned int i = idx; i < gpu_num_solved; i += stride)
       {
          gpu_rhs[i] = -gpu_residual[i];
@@ -1326,10 +1289,8 @@ public:
       gpu_A_data(A_data)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for (unsigned int il = idx; il < gpu_num_solved; il += stride)
       {
          const int crs_index = gpu_csr_diag_idx[il];
@@ -1368,10 +1329,8 @@ public:
       gpu_A_data(A_data)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for (unsigned int il = idx; il < gpu_num_solved; il += stride)
       {
          for (int jl = gpu_number_of_neighbors[il]; jl < gpu_number_of_neighbors[il + 1]; jl++)
@@ -1421,10 +1380,8 @@ public:
       gpu_A_data(A_data)
    {}
 
-   void operator() (nd_item<3> item) const
+   __device__ void operator() (const size_t idx, const size_t stride) const
    {
-      size_t idx = GDF::get_1d_index(item);
-      size_t stride = GDF::get_1d_stride(item);
       for (unsigned int i = idx; i < gpu_num_boundary_faces; i += stride)
       {
          const int cell = gpu_boundary_face_to_cell[i];
@@ -1459,7 +1416,7 @@ void Solver_base_gpu::compute_system(const int num_solved, const int num_attache
       Vector<strict_fp_t> A_data_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("A_data_local");
 
       GDF::transfer_to_gpu_noinit(A_data_local);
-      GDF::memset_gpu_var(A_data_local.gpu_data(), 0, this->nnz_local);
+      GDF::memset_gpu_var(A_data_local.gpu_data(), 0, sizeof(strict_fp_t) * this->nnz_local);
 
       // Time term
       CellRead<strict_fp_t> volume_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("volume_local");

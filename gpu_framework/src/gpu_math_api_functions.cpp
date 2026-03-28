@@ -20,7 +20,7 @@ void finalize_cublashandle()
 }
 
 
-gdf_device void kg_axpby::operator()(const size_t tid, const size_t stride) const
+__device__ void kg_axpby::operator()(const size_t tid, const size_t stride) const
 {
     for(int ii = tid; ii < num_elements; ii += stride)
     {
@@ -65,7 +65,7 @@ public:
         result(result_in)
     {}
 
-    gdf_kernel void operator()(const size_t tid, const size_t stride) const
+    __device__ void operator()(const size_t tid, const size_t stride) const
     {
         strict_fp_t local_result = 0.0;
         for(size_t kk = tid; kk < num_elements; kk += stride)
@@ -130,7 +130,7 @@ public:
         result(result_in)
     {}
 
-    gdf_device void operator()(const size_t tid, const size_t stride) const
+    __device__ void operator()(const size_t tid, const size_t stride) const
     {
         thread_result[tid] = -1.0* std::numeric_limits<strict_fp_t>::max();
         for(size_t ii = tid; ii < num_elements; ii += stride)
@@ -178,7 +178,7 @@ public:
         result(result_in)
     {}
 
-    gdf_device void operator()(const size_t tid, const size_t stride) const
+    __device__ void operator()(const size_t tid, const size_t stride) const
     {
         for(size_t ii = tid; ii < num_elements; ii += stride)
         {
@@ -209,7 +209,7 @@ void l0_norm(const size_t num_elements, const strict_fp_t* const vec, strict_fp_
     assert(result);
     size_t* thread_result = static_cast<size_t*>(GDF::malloc_gpu_var(sizeof(size_t) * SINGLE_WG_SIZE));
 
-    GDF::memset_gpu_var(thread_result, 0, SINGLE_WG_SIZE);
+    GDF::memset_gpu_var(thread_result, 0, sizeof(strict_fp_t) * SINGLE_WG_SIZE);
 
     GDF::submit_to_gpu_single_block<kg_l0_norm_single_workgroup>(num_elements, vec, thread_result, result);
 
@@ -226,7 +226,7 @@ public:
         result(result_in)
     {}
 
-    gdf_device void operator()(const size_t tid, const size_t stride) const
+    __device__ void operator()(const size_t tid, const size_t stride) const
     {
         for(size_t ii = tid; ii < num_elements; ii += stride)
         {
@@ -283,7 +283,7 @@ public:
     kg_sqrt_single_task(strict_fp_t* const result_in):result(result_in)
     {}
 
-    gdf_device void operator()(const size_t tid, const size_t stride) const
+    __device__ void operator()(const size_t tid, const size_t stride) const
     {
         result[GZ] = sqrt(result[GZ]);
     }
@@ -333,7 +333,7 @@ public:
         n(n_in)
     {}
 
-    gdf_device void operator()(const size_t tid, const size_t stride) const
+    __device__ void operator()(const size_t tid, const size_t stride) const
     {
         for(size_t kk = tid; kk < n; kk += stride)
         {
@@ -402,7 +402,7 @@ public:
         result(result_in)
     {}
 
-    gdf_device void operator()(const size_t tid, const size_t stride) const
+    __device__ void operator()(const size_t tid, const size_t stride) const
     {
         for(size_t ii = tid; ii < num_elements; ii += stride)
         {
@@ -432,7 +432,7 @@ void gpu_vec_sum(const size_t num_elements, const strict_fp_t* const vec, strict
     assert(result);
     strict_fp_t* thread_result = static_cast<strict_fp_t*>(GDF::malloc_gpu_var(sizeof(strict_fp_t) * SINGLE_WG_SIZE));
 
-    GDF::memset_gpu_var(thread_result, 0, SINGLE_WG_SIZE);
+    GDF::memset_gpu_var(thread_result, 0, sizeof(strict_fp_t) * SINGLE_WG_SIZE);
 
     GDF::submit_to_gpu_single_block<kg_vec_sum_single_workgroup>(num_elements, vec, thread_result, result);
 

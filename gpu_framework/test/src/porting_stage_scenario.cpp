@@ -47,7 +47,7 @@ public:
         T_gpu(T)
     {}
 
-    gdf_kernel void operator() (const size_t tid, const size_t stride) const
+    __device__ void operator() (const size_t tid, const size_t stride) const
     {
         for(size_t kk = tid; kk < P_gpu.size(); kk += stride)
         {
@@ -111,7 +111,7 @@ public:
         T_gpu(T)
     {}
 
-    gdf_kernel void operator() (const size_t tid, const size_t stride) const
+    __device__ void operator() (const size_t tid, const size_t stride) const
     {
         for(size_t kk = tid; kk < V_gpu.size()/2; kk += stride)
         {

@@ -3,15 +3,8 @@
 #include <cuda_runtime.h>
 #include <cstdlib>
 
-#ifdef ENABLE_GPU
-    #define gdf_kernel __host__ __device__
-    #define gdf_device __device__
-    #if defined(__CUDA_ARCH__)
-        #define DEVICE_COMPILE
-    #endif
-#else
-    #define gdf_kernel
-    #define gdf_device
+#if defined(__CUDA_ARCH__)
+    #define DEVICE_COMPILE
 #endif
 
 

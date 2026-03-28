@@ -13,7 +13,7 @@ void setup_gpu_globals()
    assert(!gpu_manager);
    gpu_manager = new GDF::GPUManager_t(gpu_global_range, gpu_local_range);
 
-   init_cublashandle();
+   GDF::init_cublashandle();
 
    log_msg("Device type selected : DEFAULT");
 }
@@ -23,7 +23,7 @@ void finalize_gpu_globals()
    assert(gpu_manager);
    GDF::gpu_barrier(); // Wait for all the GPU related processes to end
 
-   finalize_cublashandle();
+   GDF::finalize_cublashandle();
 
    // Finalize GPU Manager
    delete gpu_manager;
