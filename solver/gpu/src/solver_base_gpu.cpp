@@ -1259,7 +1259,7 @@ void Solver_base_gpu::compute_residual(const int num_solved, const int num_attac
                                                       boundary_rdista_local,
                                                       residual_local);
    
-   oneapi::math::blas::column_major::asum(GDF::get_gpu_queue(), residual_local.size(), residual_local.gpu_data(), 1, &this->residual_norm);
+   GDF::l1_norm(residual_local.size(), residual_local.gpu_data(), &this->residual_norm);
 
    MPI_Allreduce(&(this->residual_norm), &(this->residual_norm), 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 

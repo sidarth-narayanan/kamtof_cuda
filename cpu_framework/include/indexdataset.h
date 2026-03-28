@@ -15,13 +15,14 @@
 
 #ifndef ENABLE_GPU
     #define __deivce__
+    #define __host__
 #endif
 
 template <class T, std::size_t M>
 struct indexer
 {
    template <class... Indices>
-   __device__ static inline typename std::enable_if<(M == sizeof...(Indices)), T&>::type access(
+   __host__ __device__ static inline typename std::enable_if<(M == sizeof...(Indices)), T&>::type access(
       T* data, const uint32_t* ds, const short size, Indices&&... idx)
    {
       size_t index      = 0;
@@ -35,7 +36,7 @@ struct indexer
    }
 
    template <class... Indices>
-   __device__ static inline const std::enable_if<(M == sizeof...(Indices)), const T&> access_const(
+   __host__ __device__ static inline const std::enable_if<(M == sizeof...(Indices)), const T&> access_const(
       const T* data, const uint32_t* ds, const short size, Indices&&... idx)
    {
       size_t index      = 0;
@@ -52,7 +53,7 @@ struct indexer
 template <class T>
 struct indexer<T,0>
 {
-   __device__ static inline T& access( T* data, const uint32_t* ds, const short size, const size_t& ii)
+   __host__ __device__ static inline T& access( T* data, const uint32_t* ds, const short size, const size_t& ii)
    {
 #ifndef DISABLE_GPU_KERNEL_ASSERTS
       assert(ds[0] == 1);
@@ -62,7 +63,7 @@ struct indexer<T,0>
       return data[index];
    }
 
-   __device__ static inline const T& access_const(const T* data, const uint32_t* ds, const short size,
+   __host__ __device__ static inline const T& access_const(const T* data, const uint32_t* ds, const short size,
                                        const size_t& ii)
    {
       assert(ds[0] == 1);
@@ -75,7 +76,7 @@ struct indexer<T,0>
 template <class T>
 struct indexer<T, 1>
 {
-   __device__ static inline T& access(T* data, const uint32_t* ds, const short size, const size_t& ii, const size_t& jj)
+   __host__ __device__ static inline T& access(T* data, const uint32_t* ds, const short size, const size_t& ii, const size_t& jj)
    {
       assert(ds[1] == 1);
       assert(size>=2);
@@ -83,7 +84,7 @@ struct indexer<T, 1>
       return data[index];
    }
 
-   __device__ static inline const T& access_const(const T* data,
+   __host__ __device__ static inline const T& access_const(const T* data,
                                        const uint32_t* ds, const short size,
                                        const size_t& ii,
                                        const size_t& jj)
@@ -98,7 +99,7 @@ struct indexer<T, 1>
 template <class T>
 struct indexer<T, 2>
 {
-   __device__ static inline T& access(T* data, const uint32_t* ds, const short size, const size_t& ii, const size_t& jj, const size_t& kk)
+   __host__ __device__ static inline T& access(T* data, const uint32_t* ds, const short size, const size_t& ii, const size_t& jj, const size_t& kk)
    {
       assert(ds[2] == 1);
       assert(size>=3);
@@ -106,7 +107,7 @@ struct indexer<T, 2>
       return data[index];
    }
 
-   __device__ static inline const T& access_const(
+   __host__ __device__ static inline const T& access_const(
       const T* data, const uint32_t* ds, const short size, const size_t& ii, const size_t& jj, const size_t& kk)
    {
       assert(ds[2] == 1);
@@ -118,7 +119,7 @@ struct indexer<T, 2>
 template <class T>
 struct indexer<T, 3>
 {
-   __device__ static inline T& access(
+   __host__ __device__ static inline T& access(
       T* data, const uint32_t* ds, const short size, const size_t& ii, const size_t& jj, const size_t& kk, const size_t& ll)
    {
       assert(ds[3] == 1);
@@ -127,7 +128,7 @@ struct indexer<T, 3>
       return data[index];
    }
 
-   __device__ static inline const T& access_const(
+   __host__ __device__ static inline const T& access_const(
       const T* data, const uint32_t* ds, const short size, const size_t& ii, const size_t& jj, const size_t& kk, const size_t& ll)
    {
       assert(ds[3] == 1);
@@ -160,7 +161,7 @@ struct indexer<T, 4>
 template <class T>
 struct indexer<T, 5>
 {
-   __device__ static inline T& access(
+   __host__ __device__ static inline T& access(
       T* data, const uint32_t* ds, const short size, const size_t& ii, const size_t& jj, const size_t& kk, const size_t& ll, const size_t& mm, const size_t& nn)
    {
       assert(ds[5] == 1);
@@ -169,7 +170,7 @@ struct indexer<T, 5>
       return data[index];
    }
 
-   __device__ static inline const T& access_const(
+   __host__ __device__ static inline const T& access_const(
       const T* data, const uint32_t* ds, const short size, const size_t& ii, const size_t& jj, const size_t& kk, const size_t& ll, const size_t& mm, const size_t& nn)
    {
       assert(ds[5] == 1);
