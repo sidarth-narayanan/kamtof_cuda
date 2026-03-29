@@ -25,25 +25,25 @@ void transfer_to_gpu_move(const Types& ... dss_objs)
 template <typename ... Types>
 void transfer_to_gpu_readonly(const Types& ... dss_objs)
 {
-   (gpu_manager->transfer_to_gpu_internal(dss_objs, transfer_mode_t::READ_ONLY), ...);
+    (gpu_manager->transfer_to_gpu_internal(dss_objs, transfer_mode_t::READ_ONLY), ...);
 }
 
 template <typename ... Types>
 void transfer_to_gpu_copy(const Types& ... dss_objs)
 {
-   (gpu_manager->transfer_to_gpu_internal(dss_objs, transfer_mode_t::COPY), ...);
+    (gpu_manager->transfer_to_gpu_internal(dss_objs, transfer_mode_t::COPY), ...);
 }
 
 template <typename ... Types>
 void transfer_to_gpu_noinit(const Types& ... dss_objs)
 {
-   (gpu_manager->transfer_to_gpu_internal(dss_objs, transfer_mode_t::NOT_INITIALIZE), ...);
+    (gpu_manager->transfer_to_gpu_internal(dss_objs, transfer_mode_t::NOT_INITIALIZE), ...);
 }
 
 template <typename ... Types>
 void transfer_to_gpu_syncandmove(const Types& ... dss_objs)
 {
-   (gpu_manager->transfer_to_gpu_internal(dss_objs, transfer_mode_t::SYNC_AND_MOVE), ...);
+    (gpu_manager->transfer_to_gpu_internal(dss_objs, transfer_mode_t::SYNC_AND_MOVE), ...);
 }
 
 void transfer_to_cpu(const dataSetBase* const dsb_entry, transfer_mode_t transfer_mode);
@@ -51,31 +51,31 @@ void transfer_to_cpu(const dataSetBase* const dsb_entry, transfer_mode_t transfe
 template <typename ... Types>
 void transfer_to_cpu_move(Types& ... dss_objs)
 {
-   (gpu_manager->transfer_to_cpu_internal(dss_objs, transfer_mode_t::MOVE), ...);
+    (gpu_manager->transfer_to_cpu_internal(dss_objs, transfer_mode_t::MOVE), ...);
 }
 
 template <typename ... Types>
 void transfer_to_cpu_readonly(Types& ... dss_objs)
 {
-   (gpu_manager->transfer_to_cpu_internal(dss_objs, transfer_mode_t::READ_ONLY), ...);
+    (gpu_manager->transfer_to_cpu_internal(dss_objs, transfer_mode_t::READ_ONLY), ...);
 }
 
 template <typename ... Types>
 void transfer_to_cpu_copy(Types& ... dss_objs)
 {
-   (gpu_manager->transfer_to_cpu_internal(dss_objs, transfer_mode_t::COPY), ...);
+    (gpu_manager->transfer_to_cpu_internal(dss_objs, transfer_mode_t::COPY), ...);
 }
 
 template <typename ... Types>
 void transfer_to_cpu_noinit(Types& ... dss_objs)
 {
-   (gpu_manager->transfer_to_cpu_internal(dss_objs, transfer_mode_t::NOT_INITIALIZE), ...);
+    (gpu_manager->transfer_to_cpu_internal(dss_objs, transfer_mode_t::NOT_INITIALIZE), ...);
 }
 
 template <typename ... Types>
 void transfer_to_cpu_syncandmove(Types& ... dss_objs)
 {
-   (gpu_manager->transfer_to_cpu_internal(dss_objs, transfer_mode_t::SYNC_AND_MOVE), ...);
+    (gpu_manager->transfer_to_cpu_internal(dss_objs, transfer_mode_t::SYNC_AND_MOVE), ...);
 }
 
 // Device wide barrier

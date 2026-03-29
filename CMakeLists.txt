@@ -28,17 +28,17 @@ set( CMAKE_CXX_FLAGS_ASAN    "-g -O3 -DNDEBUG -fsanitize=address -fno-omit-frame
 set( CMAKE_CXX_FLAGS_RELWITHDEBINFO    "-g -O3 -DNDEBUG " )
 
 if(ENABLE_GPU)
-    set(NVCC_FLAGS_COMMON --expt-relaxed-constexpr)
-    set(NVCC_FLAGS_RELEASE -O3)
-    set(NVCC_FLAGS_DEBUG -O0 -G -g)
-    set(NVCC_FLAGS_PROF -O3 -lineinfo)
+   set(NVCC_FLAGS_COMMON --expt-relaxed-constexpr)
+   set(NVCC_FLAGS_RELEASE -O3)
+   set(NVCC_FLAGS_DEBUG -O0 -G -g)
+   set(NVCC_FLAGS_PROF -O3 -lineinfo)
 
-    if(NOT CMAKE_CUDA_ARCHITECTURES)
-        set(CMAKE_CUDA_ARCHITECTURES 86)
-    endif()
+   if(NOT CMAKE_CUDA_ARCHITECTURES)
+      set(CMAKE_CUDA_ARCHITECTURES 86)
+   endif()
 
-    set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
-    set(CMAKE_CUDA_HOST_COMPILER ${CXX})
+   set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
+   set(CMAKE_CUDA_HOST_COMPILER ${CXX})
    add_definitions(-DENABLE_GPU)
    enable_language(CUDA)
    set(CMAKE_CUDA_ARCHITECTURES 86)
@@ -68,16 +68,21 @@ if(ENABLE_GPU)
 endif()
 
 set( ENV{PROJECT_ROOT_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+set( ENV{INPUT_FRAMEWORK_DIR} $ENV{PROJECT_ROOT_DIR}/input )
 set( ENV{CPU_FRAMEWORK_DIR} $ENV{PROJECT_ROOT_DIR}/cpu_framework )
 set( ENV{CPU_SOLVER_DIR} $ENV{PROJECT_ROOT_DIR}/solver/cpu )
+
+# Add the framework subdirs
+add_subdirectory( $ENV{INPUT_FRAMEWORK_DIR} )
+
+add_subdirectory( $ENV{CPU_FRAMEWORK_DIR} )
 
 if (ENABLE_GPU)
    set( ENV{GPU_FRAMEWORK_DIR} $ENV{PROJECT_ROOT_DIR}/gpu_framework )
    add_subdirectory( $ENV{GPU_FRAMEWORK_DIR} )
 endif()
 
-add_subdirectory( $ENV{CPU_FRAMEWORK_DIR} )
-
+# Add solver source
 aux_source_directory( $ENV{CPU_SOLVER_DIR}/src CpuSolverSrcTop)
 
 if(ENABLE_GPU)
@@ -91,14 +96,16 @@ else()
 endif()
 
 target_compile_options(solver PRIVATE
-    # CUDA specific flags
-    $<$<COMPILE_LANGUAGE:CUDA>: ${NVCC_FLAGS_COMMON} ${NVCC_FLAGS_${CMAKE_BUILD_TYPE}} -Xcompiler ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
+   # CUDA specific flags
+   $<$<COMPILE_LANGUAGE:CUDA>: ${NVCC_FLAGS_COMMON} ${NVCC_FLAGS_${CMAKE_BUILD_TYPE}} -Xcompiler ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
 )
 
 target_include_directories( solver PUBLIC
    $ENV{CPU_SOLVER_DIR}/include
+   $ENV{INPUT_FRAMEWORK_DIR}/include
    $ENV{CPU_FRAMEWORK_DIR}/include
    $ENV{CPU_FRAMEWORK_DIR}/include/detail
+   $ENV{INPUT_FRAMEWORK_DIR}/include
 )
 
 if (ENABLE_GPU)

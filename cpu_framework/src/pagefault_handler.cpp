@@ -2,7 +2,7 @@
 #include <string.h>
 #include <numeric>
 
-#include "logger.hpp"
+#include "logger.h"
 #include "datasetbase.h"
 #include "pagefault_handler.h"
 #include "cpu_globals.h"

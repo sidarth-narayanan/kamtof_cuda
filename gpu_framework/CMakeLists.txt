@@ -18,6 +18,7 @@ target_include_directories( gpu_framework PUBLIC
    ${GPU_FRAMEWORK_DIR}/include/detail
    $ENV{CPU_FRAMEWORK_DIR}/include
    $ENV{CPU_FRAMEWORK_DIR}/include/detail
+   $ENV{INPUT_FRAMEWORK_DIR}/include
 )
 
 target_link_libraries(gpu_framework MPI::MPI_CXX cublas cusparse) # FIXME: Add CUDA here
@@ -28,8 +29,8 @@ set(NVCC_FLAGS_DEBUG -O0 -G -g)
 set(NVCC_FLAGS_PROF -O3 -lineinfo)
 
 target_compile_options(gpu_framework PRIVATE
-    # CUDA specific flags
-    $<$<COMPILE_LANGUAGE:CUDA>: ${NVCC_FLAGS_COMMON} ${NVCC_FLAGS_${CMAKE_BUILD_TYPE}} -Xcompiler ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
+   # CUDA specific flags
+   $<$<COMPILE_LANGUAGE:CUDA>: ${NVCC_FLAGS_COMMON} ${NVCC_FLAGS_${CMAKE_BUILD_TYPE}} -Xcompiler ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
 )
 
 ###### Add target and dependencies for unit tests ##############
@@ -54,11 +55,8 @@ if (BUILD_TEST)
    )
 
 target_compile_options(gpu_framework_test PRIVATE
-       # CUDA specific flags
-       $<$<COMPILE_LANGUAGE:CUDA>: ${NVCC_FLAGS_COMMON} ${NVCC_FLAGS_${CMAKE_BUILD_TYPE}} -Xcompiler ${CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
-
-       # C++ specific flags
-       $<$<COMPILE_LANGUAGE:CXX>: ${CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
-   )
+   # CUDA specific flags
+   $<$<COMPILE_LANGUAGE:CUDA>: ${NVCC_FLAGS_COMMON} ${NVCC_FLAGS_${CMAKE_BUILD_TYPE}} -Xcompiler ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
+)
 
 endif()

@@ -16,50 +16,50 @@
 class Solver_base
 {
 public:
-   void allocate_variables();
+    void allocate_variables();
 
-   void setup_matrix_struct(const int num_solved, const int num_involved);
-   
-   void set_boundary_conditions(const strict_fp_t QL, const strict_fp_t QR, const strict_fp_t QB, const strict_fp_t QT);
-   
-   void initialize_solution(const int num_solved, const strict_fp_t Q_initial);
-   
-   void compute_time_step(const int num_solved, const int num_attached);
-   
-   void compute_system(const int num_solved, const int num_attached);
-   
-   void update_solution(const int num_solved);
+    void setup_matrix_struct(const int num_solved, const int num_involved);
 
-   void compute_rdist(const int num_solved, const int num_attached);
+    void set_boundary_conditions(const strict_fp_t QL, const strict_fp_t QR, const strict_fp_t QB, const strict_fp_t QT);
 
-   void compute_residual(const int num_solved, const int num_attached);
+    void initialize_solution(const int num_solved, const strict_fp_t Q_initial);
 
-   void write_solution(const int num_solved, const int num_cells, std::string file_name);
+    void compute_time_step(const int num_solved, const int num_attached);
 
-   void write_residual(std::string file_name, std::vector<strict_fp_t>& residual_norm);
-   
-   strict_fp_t print_residual_norm(const int time_iter);
+    void compute_system(const int num_solved, const int num_attached);
 
-   strict_fp_t get_residual_norm();
+    void update_solution(const int num_solved);
 
-   void mpi_nbr_communication(strict_fp_t* vecg);     
+    void compute_rdist(const int num_solved, const int num_attached);
 
-   void compute_residual_norm(const int num_solved);
+    void compute_residual(const int num_solved, const int num_attached);
 
-   void jacobi_linear_solver(const int num_solved);
+    void write_solution(const int num_solved, const int num_cells, std::string file_name);
 
-   void matrix_vector_multiply(const int num_solved, VectorRead<int>& ia_local, VectorRead<int>& ja_local, VectorRead<strict_fp_t>& A_data_local, strict_fp_t* vec_in, strict_fp_t* const vec_out);
+    void write_residual(std::string file_name, std::vector<strict_fp_t>& residual_norm);
 
-   strict_fp_t dot_product(const size_t num_elements, const strict_fp_t* const x1, const strict_fp_t* const x2);
+    strict_fp_t print_residual_norm(const int time_iter);
 
-   void bicgstab_linear_solver();
+    strict_fp_t get_residual_norm();
 
-   Solver_base();
+    void mpi_nbr_communication(strict_fp_t* vecg);
 
-   int nnz_local;
-   int nrow_local;
-   int ncol_local;
+    void compute_residual_norm(const int num_solved);
 
-   strict_fp_t residual_norm;
-   strict_fp_t delta_t;
+    void jacobi_linear_solver(const int num_solved);
+
+    void matrix_vector_multiply(const int num_solved, VectorRead<int>& ia_local, VectorRead<int>& ja_local, VectorRead<strict_fp_t>& A_data_local, strict_fp_t* vec_in, strict_fp_t* const vec_out);
+
+    strict_fp_t dot_product(const size_t num_elements, const strict_fp_t* const x1, const strict_fp_t* const x2);
+
+    void bicgstab_linear_solver();
+
+    Solver_base();
+
+    int nnz_local;
+    int nrow_local;
+    int ncol_local;
+
+    strict_fp_t residual_norm;
+    strict_fp_t delta_t;
 };

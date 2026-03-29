@@ -1,5 +1,4 @@
-#ifndef SILO_FWD_H
-#define SILO_FWD_H
+#pragma once
 
 #include <cstdint>
 #include "cpu_framework_enums.h"
@@ -47,5 +46,3 @@ using Parameter = dataSetStorage<T, CDF::StorageType::PARAMETER, DIMS>&;
 
 template <class T, uint8_t DIMS = ZEROD>
 using ParameterRead = dataSetStorageRead<T, CDF::StorageType::PARAMETER, DIMS>&;
-
-#endif // SILO_FWD_H
