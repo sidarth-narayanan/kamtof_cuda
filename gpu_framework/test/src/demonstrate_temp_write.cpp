@@ -16,12 +16,12 @@ static void compute_x_n_plus_1_async();
 static void compute_x_n_plus_1();
 static void write_output_on_cpu(const uint64_t iter);
 
-static gdf_kernel inline strict_fp_t f_x(const strict_fp_t& x)
+static __host__ __device__ inline strict_fp_t f_x(const strict_fp_t& x)
 {
     return (exp(-1.0 * x) - x);
 }
 
-static gdf_kernel inline strict_fp_t f_dash_x(const strict_fp_t& x)
+static __device__ inline strict_fp_t f_dash_x(const strict_fp_t& x)
 {
     return ((-1.0*exp(-1.0 * x)) - 1.0);
 }
@@ -160,7 +160,7 @@ public:
         gpu_fx(fx)
     {}
 
-    gdf_device void operator() (const size_t tid, const size_t stride) const
+    __device__ void operator() (const size_t tid, const size_t stride) const
     {
         for(size_t kk = tid; kk < gpu_x.size(); kk += stride)
         {

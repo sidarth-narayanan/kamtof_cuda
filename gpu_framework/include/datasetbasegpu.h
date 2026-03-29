@@ -28,12 +28,12 @@ public:
 
    ~dataSetBaseGPU(){}
 
-   gdf_kernel void* void_data()
+   __host__ __device__ void* void_data()
    {
       return m_gpu_data;
    }
 
-   gdf_kernel const void* void_data() const
+   __host__ __device__ const void* void_data() const
    {
       return m_gpu_data;
    }
@@ -43,12 +43,12 @@ public:
       m_gpu_data = data;
    }
 
-   gdf_kernel const uint32_t* offsets() const
+   __host__ __device__ const uint32_t* offsets() const
    {
       return m_offsets;
    }
 
-   gdf_kernel uint8_t num_offsets() const
+   __host__ __device__ uint8_t num_offsets() const
    {
       return m_num_offsets;
    }
@@ -58,7 +58,7 @@ public:
       m_size = size_in;
    }
 
-   gdf_kernel size_t size() const
+   __host__ __device__ size_t size() const
    {
       return m_size;
    }

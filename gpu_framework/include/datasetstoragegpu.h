@@ -51,24 +51,24 @@ public:
     }
 
     template <class... Indices>
-    gdf_kernel inline T& operator()(Indices&&... idx)
+    __device__ inline T& operator()(Indices&&... idx)
     {
         return dataSetGPU<T,DIMS>::operator () (static_cast<Indices&&>(idx)...);
     }
 
     template <class... Indices>
-    gdf_kernel const inline T& operator()(Indices&&... idx) const
+    __device__ const inline T& operator()(Indices&&... idx) const
     {
         return dataSetGPU<T,DIMS>::operator () (static_cast<Indices&&>(idx)...);
     }
 
-    gdf_kernel inline operator T& ()
+    __device__ inline operator T& ()
     {
         static_assert(TYPE == CDF::StorageType::PARAMETER && DIMS == 0, "This functionality is only supported for parameters");
         return static_cast<T*>(dataSetBase::m_data)[0];
     }
 
-    gdf_kernel inline operator const T& () const
+    __device__ inline operator const T& () const
     {
         static_assert(TYPE == CDF::StorageType::PARAMETER && DIMS == 0, "This functionality is only supported for parameters");
         return static_cast<const T*>(dataSetBase::m_data)[0];

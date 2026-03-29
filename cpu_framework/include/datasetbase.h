@@ -73,7 +73,9 @@ public:
         assert(CDF::extractor<T>::PODType() == m_pod_type); // Make sure the calling type is the same as the register type
         assert(index < m_size && !m_offsets); // Ensure that the index is within bounds
 #endif
+#ifdef ENABLE_GPU
         in_const_operator = false;
+#endif
         return static_cast<T*>(m_data)[index];
     }
 
@@ -84,7 +86,9 @@ public:
         assert(CDF::extractor<T>::PODType() == m_pod_type); // Make sure the calling type is the same as the register type
         assert(index < m_size && !m_offsets); // Ensure that the index is within bounds
 #endif
+#ifdef ENABLE_GPU
         in_const_operator = true;
+#endif
         return static_cast<T*>(m_data)[index];
     }
 
@@ -115,10 +119,15 @@ protected:
     void delete_m_data();
     void resize_internal(const size_t new_byte_size);
 
+    void allocate_page_aligned_memory_internal(const size_t byte_size);
+    void deallocate_page_aligned_memory_internal();
+    void copy_over_and_resize_page_aligned_memory(const size_t new_byte_size);
+
     void* m_data;
 
     size_t m_size;
     size_t m_byte_size;
+    size_t allocation_size = 0; // The cloest multiple of system_page_size which is greater than m_byte_size
 
     uint32_t* m_offsets;
     uint8_t m_num_offsets;
@@ -133,19 +142,12 @@ protected:
 protected:
     // The mutable keyword allows const functions modify it
     mutable GDF::GPUInstance_t* gpu_instance = nullptr;
-    uint64_t allocation_size = 0; // The cloest multiple of system_page_size which is greater than m_byte_size
 
     void deallocate_gpu_data_ptr();
-    void allocate_page_aligned_memory_internal(const size_t byte_size);
-    void deallocate_page_aligned_memory_internal();
-    void copy_over_and_resize_page_aligned_memory(const size_t new_byte_size);
     void deallocate_gpu_instance();
     void destruct_gpu_instance();
     void* get_gpu_void_data();
     const void* get_gpu_void_data() const;
-#ifndef NDEBUG
-    void assert_cpu_data_writeability();
-#endif
 
 public:
 

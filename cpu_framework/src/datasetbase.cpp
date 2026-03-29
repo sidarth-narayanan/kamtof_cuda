@@ -1,7 +1,7 @@
 #include <cassert>
 #include <memory.h>
 #include <sys/mman.h>
-
+#include "pagefault_handler.h"
 #include "datasetbase.h"
 #include "extractor.hpp"
 #include "silo_utils.h"
@@ -88,11 +88,11 @@ void dataSetBase::resize_internal(const size_t new_size)
         // m_data exists, we need copy it over and free it
         if(m_data)
         {
-            copy_over_and_resize_page_aligned_memory(new_byte_size);
+            this->copy_over_and_resize_page_aligned_memory(new_byte_size);
         }
         else // m_data is null, so we do not need to do copy and free
         {
-            allocate_m_data(new_byte_size);
+            this->allocate_m_data(new_byte_size);
         }
     }
 #ifndef NDEBUG
@@ -152,4 +152,60 @@ void dataSetBase::delete_m_data()
 {
     assert(m_data);
     deallocate_page_aligned_memory_internal();
+}
+
+// NOTE: The actual allocation size is greater than (or) equal to "byte_size" for ENABLE_GPU=ON builds as it must be a multiple of sytstem page size
+void dataSetBase::allocate_page_aligned_memory_internal(const size_t byte_size)
+{
+    std::pair<void*, size_t> allocated_data = allocate_page_aligned_memory(byte_size);
+    m_data = allocated_data.first;
+    allocation_size = allocated_data.second;
+
+#ifndef NDEBUG // Check if the dsb pointer already exist
+    for(std::set<std::pair<void*, dataSetBase*>>::iterator it = dsb_addr_set.begin(); it != dsb_addr_set.end(); it++)
+    {
+        if(it->second == this)
+        {
+            log_error("Trying to add the same DSB pointer " + m_name +" multiple times in the dsb_addr_set!");
+        }
+    }
+#endif
+
+    if(!dsb_addr_set.insert(std::make_pair(m_data, this)).second) // Add this variable and it's m_data to the dsb_addr_set
+    {
+        log_msg<CDF::LogLevel::ERROR>(std::string("Duplicate insert in dsb_addr_set for variable ") + m_name);
+    }
+}
+
+void dataSetBase::deallocate_page_aligned_memory_internal()
+{
+    assert(m_data);
+    deallocate_page_aligned_memory(m_data, allocation_size);
+    allocation_size = 0;
+    if(dsb_addr_set.erase(std::make_pair(m_data, this)) != 1) // Erase this variable and it's m_data to the dsb_addr_set
+    {
+        log_msg<CDF::LogLevel::ERROR>(std::string("m_data not found in dsb_addr_set for variable ") + m_name);
+    }
+}
+
+void dataSetBase::copy_over_and_resize_page_aligned_memory(const size_t new_byte_size)
+{
+    assert(m_size != 0 && m_byte_size != 0);
+    // Allocate new data and copy over data
+    std::pair<void*, size_t> allocated_data = allocate_page_aligned_memory(new_byte_size);
+    void* new_data = allocated_data.first;
+    size_t new_allocation_size = allocated_data.second;
+
+    size_t copy_byte_size = (new_byte_size <= m_byte_size) ? new_byte_size : m_byte_size;
+    memcpy(new_data, m_data, copy_byte_size);
+
+    // Pointer Swap
+    delete_m_data();
+    // m_size and m_byte_size will be set outside the scope in which this function is invoked
+    m_data = new_data;
+    allocation_size = new_allocation_size;
+    if(!dsb_addr_set.insert(std::make_pair(m_data, this)).second) // Add this variable and it's m_data to the dsb_addr_set
+    {
+        log_msg<CDF::LogLevel::ERROR>(std::string("Duplicate insert in dsb_addr_set for variable ") + m_name);
+    }
 }

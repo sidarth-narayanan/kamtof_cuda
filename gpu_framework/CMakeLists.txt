@@ -29,10 +29,7 @@ set(NVCC_FLAGS_PROF -O3 -lineinfo)
 
 target_compile_options(gpu_framework PRIVATE
     # CUDA specific flags
-    $<$<COMPILE_LANGUAGE:CUDA>: ${NVCC_FLAGS_COMMON} ${NVCC_FLAGS_${CMAKE_BUILD_TYPE}} -Xcompiler ${CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
-
-    # C++ specific flags
-    $<$<COMPILE_LANGUAGE:CXX>: ${CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
+    $<$<COMPILE_LANGUAGE:CUDA>: ${NVCC_FLAGS_COMMON} ${NVCC_FLAGS_${CMAKE_BUILD_TYPE}} -Xcompiler ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
 )
 
 ###### Add target and dependencies for unit tests ##############

@@ -14,7 +14,7 @@ public:
       scale(scale_in)
    {}
 
-   gdf_device void operator() (const size_t tid, const size_t stride) const;
+   __device__ void operator() (const size_t tid, const size_t stride) const;
 
    template<uint8_t N>
    void transfer_vars_to_gpu()
@@ -38,7 +38,7 @@ public:
       R(R_in)
    {}
 
-   gdf_device void operator() (const size_t tid, const size_t stride) const;
+   __device__ void operator() (const size_t tid, const size_t stride) const;
 
    template<uint8_t N>
    void transfer_vars_to_gpu()
@@ -65,7 +65,7 @@ public:
       R(R_in)
    {}
 
-   gdf_device void operator() (const size_t tid, const size_t stride) const;
+   __device__ void operator() (const size_t tid, const size_t stride) const;
 
    template<uint8_t N>
    void transfer_vars_to_gpu()
@@ -87,7 +87,7 @@ public:
    kg_test_kernel(const int xx, const strict_fp_t yy):x(xx), y(yy)
    {}
 
-   gdf_device void operator() (const size_t tid, const size_t stride) const;
+   __device__ void operator() (const size_t tid, const size_t stride) const;
 
    template<uint8_t N>
    void transfer_vars_to_gpu()
@@ -108,7 +108,7 @@ public:
       velocity(velocity_in), init_val_x(init_val_x_in), init_val_y(init_val_y_in), init_val_z(init_val_z_in)
    {}
 
-   gdf_device void operator() (const size_t tid, const size_t stride) const;
+   __device__ void operator() (const size_t tid, const size_t stride) const;
 
    template<uint8_t N>
    void transfer_vars_to_gpu()
@@ -131,7 +131,7 @@ public:
       size(size_in)
    {}
 
-   gdf_device void operator() (const size_t tid, const size_t stride) const;
+   __device__ void operator() (const size_t tid, const size_t stride) const;
 
 private:
    strict_fp_t* vec;
@@ -147,7 +147,7 @@ public:
       size(size_in)
    {}
 
-   gdf_device void operator() (const size_t tid, const size_t stride) const;
+   __device__ void operator() (const size_t tid, const size_t stride) const;
 
 private:
    strict_fp_t* result;
@@ -164,7 +164,7 @@ public:
       gpu_subtract_val(subtract_val)
    {}
 
-   gdf_device void operator() (const size_t tid, const size_t stride) const;
+   __device__ void operator() (const size_t tid, const size_t stride) const;
 
    template<uint8_t N>
    void transfer_vars_to_gpu()

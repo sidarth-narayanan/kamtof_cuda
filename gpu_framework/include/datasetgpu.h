@@ -19,21 +19,21 @@ public:
       dataSetBaseGPU(data, num_offsets, offsets, num_entries)
    {}
 
-   gdf_kernel size_t byte_size() const;
+   __host__ __device__ size_t byte_size() const;
 
-   gdf_kernel const T* data() const
+   __host__ __device__ const T* data() const
    {
       return static_cast<T*>(this->m_gpu_data);
    }
 
-   gdf_kernel T* data()
+   __host__ __device__ T* data()
    {
       return static_cast<T*>(this->m_gpu_data);
    }
 
-   gdf_kernel size_t total_num_elements() const;
+   __host__ __device__ size_t total_num_elements() const;
 
-   gdf_kernel inline const T& operator[](size_t idx) const
+   __host__ __device__ inline const T& operator[](size_t idx) const
    {
       static_assert(DIMS == 0, "The [] operator is only for ZEROD in release mode and in debug mode for users to index the data as a 1D array");
       assert(this->m_gpu_data && "Variable is not transfered to GPU (or) Non existent SILO variable is used on the GPU");
@@ -41,7 +41,7 @@ public:
       return static_cast<T*>(this->m_gpu_data)[idx];
    }
 
-   gdf_kernel inline T& operator[](size_t idx)
+   __host__ __device__ inline T& operator[](size_t idx)
    {
       static_assert(DIMS == 0, "The [] operator is only for ZEROD in release mode and in debug mode for users to index the data as a 1D array");
       assert(this->m_gpu_data && "Variable is not transfered to GPU (or) Non existent SILO variable is used on the GPU");
@@ -51,7 +51,7 @@ public:
    }
 
    template <class... Indices>
-   gdf_kernel inline T& operator()(Indices&&... idx)
+   __host__ __device__ inline T& operator()(Indices&&... idx)
    {
       static_assert(DIMS > 0, "This interface is not intended for 0 dimensional data");
       static_assert(DIMS + 1 == sizeof...(Indices), "You have provided the wrong number of arguments");
@@ -61,7 +61,7 @@ public:
    }
 
    template <class... Indices>
-   gdf_kernel const inline T& operator()(Indices&&... idx) const
+   __device__ const inline T& operator()(Indices&&... idx) const
    {
       static_assert(DIMS > 0, "This interface is not intended for 0 dimensional data");
       static_assert(DIMS + 1 == sizeof...(Indices), "You have provided the wrong number of arguments");
@@ -70,7 +70,7 @@ public:
    }
 
    // Both const and non-const objects can call this function
-   gdf_kernel inline bool exists() const
+   __host__ __device__ inline bool exists() const
    {
       // For now, we are doing the simple check if the GPU data exists
       return this->void_data();

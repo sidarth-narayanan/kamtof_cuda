@@ -4,7 +4,7 @@
 #include "gpu_atomics.h" // For atomics
 #include "gpu_api_functions.h"
 
-gdf_device void kg_scale_pressure_and_change_scale::operator() (const size_t tid, const size_t stride) const
+__device__ void kg_scale_pressure_and_change_scale::operator() (const size_t tid, const size_t stride) const
 {
     if(tid < pressure.size())
     {
@@ -16,7 +16,7 @@ gdf_device void kg_scale_pressure_and_change_scale::operator() (const size_t tid
     }
 }
 
-gdf_device void kg_compute_temperature::operator() (const size_t tid, const size_t stride) const
+__device__ void kg_compute_temperature::operator() (const size_t tid, const size_t stride) const
 {
     if(tid < temperature.size())
     {
@@ -24,7 +24,7 @@ gdf_device void kg_compute_temperature::operator() (const size_t tid, const size
     }
 }
 
-gdf_device void kg_compute_pressure::operator() (const size_t tid, const size_t stride) const
+__device__ void kg_compute_pressure::operator() (const size_t tid, const size_t stride) const
 {
     if(tid < pressure.size())
     {
@@ -32,7 +32,7 @@ gdf_device void kg_compute_pressure::operator() (const size_t tid, const size_t 
     }
 }
 
-gdf_device void kg_test_kernel::operator() (const size_t tid, const size_t stride) const
+__device__ void kg_test_kernel::operator() (const size_t tid, const size_t stride) const
 {
     if(tid && x && y)
     {
@@ -40,7 +40,7 @@ gdf_device void kg_test_kernel::operator() (const size_t tid, const size_t strid
     }
 }
 
-gdf_device void kg_set_initial_condition::operator() (const size_t tid, const size_t stride) const
+__device__ void kg_set_initial_condition::operator() (const size_t tid, const size_t stride) const
 {
     if(tid < velocity.size())
     {
@@ -50,7 +50,7 @@ gdf_device void kg_set_initial_condition::operator() (const size_t tid, const si
     }
 }
 
-gdf_device void kg_norm2::operator() (const size_t tid, const size_t stride) const
+__device__ void kg_norm2::operator() (const size_t tid, const size_t stride) const
 {
     strict_fp_t sum = 0.0;
     for(size_t ii = tid; ii < size; ii += stride)
@@ -75,7 +75,7 @@ gdf_device void kg_norm2::operator() (const size_t tid, const size_t stride) con
     }
 }
 
-gdf_device void kg_atomics::operator() (const size_t tid, const size_t stride) const
+__device__ void kg_atomics::operator() (const size_t tid, const size_t stride) const
 {
     for(size_t ii = tid; ii < size; ii += stride)
     {
@@ -86,7 +86,7 @@ gdf_device void kg_atomics::operator() (const size_t tid, const size_t stride) c
     }
 }
 
-gdf_device void kg_silo_null::operator ()(const size_t tid, const size_t stride) const
+__device__ void kg_silo_null::operator ()(const size_t tid, const size_t stride) const
 {
     // Only do the subtraction if the GPU SILO object exist
     if(gpu_silo_null.exists() && tid == gpu_random_idx)
