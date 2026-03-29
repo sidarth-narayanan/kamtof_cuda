@@ -9,33 +9,33 @@
 class Grid
 {
 public:
-   void allocate_variables();
+    void allocate_variables();
 
-   void generate_grid();
-   
-   void distribute_grid();
+    void generate_grid();
 
-   void assign_mpi_grid();
+    void distribute_grid();
 
-   void print_grid_information ();
-   
-   Grid(const int Nx, const int Ny);
+    void assign_mpi_grid();
 
-   int Nx;
-   int Ny;
+    void print_grid_information ();
 
-   std::vector<int>num_solved_array;
-   std::vector<int>num_involved_array;
+    Grid(const int Nx, const int Ny);
 
-   int num_cells;
-   int num_faces;
-   int num_solved;
-   int num_involved;
-   int num_attached;
-   
-   int num_boundary_faces;
-   int num_boundary;
-   strict_fp_t dx, dy;
+    int Nx;
+    int Ny;
+
+    std::vector<int>num_solved_array;
+    std::vector<int>num_involved_array;
+
+    int num_cells;
+    int num_faces;
+    int num_solved;
+    int num_involved;
+    int num_attached;
+
+    int num_boundary_faces;
+    int num_boundary;
+    strict_fp_t dx, dy;
 };
 
 void mpi_nbnb_transfer(strict_fp_t *vec);

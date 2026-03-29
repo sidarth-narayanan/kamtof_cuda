@@ -28,17 +28,17 @@ set( CMAKE_CXX_FLAGS_ASAN    "-g -O3 -DNDEBUG -fsanitize=address -fno-omit-frame
 set( CMAKE_CXX_FLAGS_RELWITHDEBINFO    "-g -O3 -DNDEBUG " )
 
 if(ENABLE_GPU)
-    set(NVCC_FLAGS_COMMON --expt-relaxed-constexpr)
-    set(NVCC_FLAGS_RELEASE -O3)
-    set(NVCC_FLAGS_DEBUG -O0 -G -g)
-    set(NVCC_FLAGS_PROF -O3 -lineinfo)
+   set(NVCC_FLAGS_COMMON --expt-relaxed-constexpr)
+   set(NVCC_FLAGS_RELEASE -O3)
+   set(NVCC_FLAGS_DEBUG -O0 -G -g)
+   set(NVCC_FLAGS_PROF -O3 -lineinfo)
 
-    if(NOT CMAKE_CUDA_ARCHITECTURES)
-        set(CMAKE_CUDA_ARCHITECTURES 86)
-    endif()
+   if(NOT CMAKE_CUDA_ARCHITECTURES)
+      set(CMAKE_CUDA_ARCHITECTURES 86)
+   endif()
 
-    set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
-    set(CMAKE_CUDA_HOST_COMPILER ${CXX})
+   set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
+   set(CMAKE_CUDA_HOST_COMPILER ${CXX})
    add_definitions(-DENABLE_GPU)
    enable_language(CUDA)
    set(CMAKE_CUDA_ARCHITECTURES 86)
@@ -96,8 +96,8 @@ else()
 endif()
 
 target_compile_options(solver PRIVATE
-    # CUDA specific flags
-    $<$<COMPILE_LANGUAGE:CUDA>: ${NVCC_FLAGS_COMMON} ${NVCC_FLAGS_${CMAKE_BUILD_TYPE}} -Xcompiler ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
+   # CUDA specific flags
+   $<$<COMPILE_LANGUAGE:CUDA>: ${NVCC_FLAGS_COMMON} ${NVCC_FLAGS_${CMAKE_BUILD_TYPE}} -Xcompiler ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
 )
 
 target_include_directories( solver PUBLIC
