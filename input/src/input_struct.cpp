@@ -6,9 +6,9 @@
 #include <cassert>
 
 #include "fp_data_types.h"
-#include "input_parser.h"
+#include "input_struct.h"
 
-InputParser* inputs;
+InputStruct* inputs;
 
 // list of all valid input strings
 static const std::vector<std::string> reference_input_strings = {"use_gpu_solver",
@@ -29,25 +29,25 @@ void error_out(const std::string& err_msg)
 }
 
 /**
- * @brief InputParser: Constructor for parsing input file data.
+ * @brief InputStruct: Constructor for parsing input file data.
  * @param input_filename: Name of input file
 */
-InputParser::InputParser(std::string input_file) : input_filename(input_file)
+InputStruct::InputStruct(std::string input_file) : input_filename(input_file)
 {
     this->read_inputs(this->input_filename);
 }
 
 /**
- * @brief InputParser: Constructor for setting default values for input options in the absence of an input file.
+ * @brief InputStruct: Constructor for setting default values for input options in the absence of an input file.
  * @param input_filename: Name of input file
 */
-InputParser::InputParser() {}
+InputStruct::InputStruct() {}
 
 /**
- * @brief read_inputs: Read input file and store data in an input_struct
+ * @brief read_inputs: Read input file and store data in an inputs
  * @param input_filename: Name of input file
 */
-void InputParser::read_inputs(const std::string& input_filename)
+void InputStruct::read_inputs(const std::string& input_filename)
 {
     // total number of valid inputs contained in the input data struct
     const int ninputs = reference_input_strings.size();
@@ -92,7 +92,7 @@ void InputParser::read_inputs(const std::string& input_filename)
  * @param line         : std::string containing a line from the input file.
  * @param input_count  : Running count of number of valid input options found.
 */
-std::string InputParser::find_input_option(const std::vector<std::string>& input_strings,
+std::string InputStruct::find_input_option(const std::vector<std::string>& input_strings,
                                            const std::string& line,
                                            int& input_count)
 {
@@ -129,7 +129,7 @@ std::string InputParser::find_input_option(const std::vector<std::string>& input
  * @param input_string: Vector of strings containing all valid input options.
  * @param line        : std::string containing a line from the input file.
 */
-void InputParser::parse_input_value(std::string& input_string,
+void InputStruct::parse_input_value(std::string& input_string,
                                     std::string& line)
 {
     // get length of input string
@@ -224,7 +224,7 @@ void InputParser::parse_input_value(std::string& input_string,
 /**
  * @brief print_input_struct: Output all members of the input data struct.
 */
-void InputParser::print_input_struct()
+void InputStruct::print_input_struct()
 {
     printf("----------------- PRINTING VALUES FROM INPUT FILES --------------\n");
 
@@ -249,7 +249,7 @@ void InputParser::print_input_struct()
  * @brief print_variable_value: print value of a variable from the input struct
 */
 template <typename T>
-void InputParser::print_variable_value(const std::string &varname, T& value)
+void InputStruct::print_variable_value(const std::string &varname, T& value)
 {
     std::cout << varname << ": " << value << std::endl;
 }

@@ -9,7 +9,7 @@
 #include "silo.h"
 #include "silo_fwd.h"
 #include "fp_data_types.h"
-#include "input_parser.h"
+#include "input_struct.h"
 #ifdef ENABLE_GPU
 #include "gpu_api_functions.h"
 #endif

@@ -11,7 +11,7 @@
 #include "silo.h"
 #include "silo_fwd.h"
 #include "fp_data_types.h"
-#include "input_parser.h"
+#include "input_struct.h"
 
 Solver_base::Solver_base()
 {

@@ -4,7 +4,7 @@
 #include <cstdlib>
 
 #if defined(__CUDA_ARCH__)
-    #define DEVICE_COMPILE
+#define DEVICE_COMPILE
 #endif
 
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef CDF_GLOBAL
-    #define CDF_GLOBAL extern
+#define CDF_GLOBAL extern
 #endif
 
 #include <set>

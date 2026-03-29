@@ -1,5 +1,4 @@
-#ifndef SILO_UTILS_H
-#define SILO_UTILS_H
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -12,5 +11,3 @@ enum class POD_t : uint8_t;
 
 std::string get_storage_type_name(const CDF::StorageType &TYPE);
 uint32_t get_single_element_byte_size(const CDF::POD_t& TYPE);
-
-#endif // SILO_UTILS_H

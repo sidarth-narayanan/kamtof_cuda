@@ -4,7 +4,7 @@
 #include <string>
 #include "fp_data_types.h"
 
-class InputParser
+class InputStruct
 {
 public:
 
@@ -19,9 +19,9 @@ public:
     size_t gpu_global_range  = 262144;  // Global range for GPU kernels
     size_t gpu_local_range  = 256;  // Global range for GPU kernels
 
-    InputParser(std::string input_file);
+    InputStruct(std::string input_file);
 
-    InputParser();
+    InputStruct();
 
     void read_inputs(const std::string& input_filename);
     
@@ -40,4 +40,4 @@ public:
     std::string input_filename = "NULL"; // default name of input filename                    
 };
 
-extern InputParser* inputs;
+extern InputStruct* inputs;

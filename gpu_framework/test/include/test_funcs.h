@@ -17,10 +17,10 @@ void demonstrate_temp_write_impl(bool async);
 
 inline void demonstrate_temp_write_async()
 {
-   return demonstrate_temp_write_impl(true);
+    return demonstrate_temp_write_impl(true);
 }
 
 inline void demonstrate_temp_write()
 {
-   return demonstrate_temp_write_impl(false);
+    return demonstrate_temp_write_impl(false);
 }

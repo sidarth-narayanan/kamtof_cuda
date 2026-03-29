@@ -1,5 +1,4 @@
-#ifndef DATASET_H
-#define DATASET_H
+#pragma once
 
 #include "datasetbase.h"
 #include "indexdataset.h"
@@ -95,5 +94,3 @@ public:
     }
 #endif
 };
-
-#endif // DATASET_H

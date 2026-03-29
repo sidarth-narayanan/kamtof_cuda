@@ -1,6 +1,6 @@
 #include "gpu_globals.h" // For GPU Globals
 #include "gpu_api_functions.h" // For GPU API functions
-#include "input_parser.h"
+#include "input_struct.h"
 
 // Allocate and initialize GPU variables
 void setup_gpu_globals()
