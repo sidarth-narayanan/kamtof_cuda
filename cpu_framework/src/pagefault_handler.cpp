@@ -5,14 +5,14 @@
 #include "logger.hpp"
 #include "datasetbase.h"
 #include "pagefault_handler.h"
-#include "gpu_globals.h"
+#include "cpu_globals.h"
 
 struct sigaction old_handler;
 
-std::pair<void*,uint64_t> allocate_page_aligned_memory(const uint64_t byte_size)
+std::pair<void*,size_t> allocate_page_aligned_memory(const size_t byte_size)
 {
     // For pagefault mechanism to work, the allocation size must be a multiple of system page size
-    uint64_t allocation_size = system_page_size * ((byte_size/system_page_size) + ((byte_size % system_page_size) ? 1 : 0));
+    size_t allocation_size = system_page_size * ((byte_size/system_page_size) + ((byte_size % system_page_size) ? 1 : 0));
 
     /*
     * We allocate the data using the 'mmap' function which gives up page aligned memory of size allocation size.
@@ -30,7 +30,7 @@ std::pair<void*,uint64_t> allocate_page_aligned_memory(const uint64_t byte_size)
     return std::make_pair(m_data, allocation_size);
 }
 
-void deallocate_page_aligned_memory(void* m_data, const uint64_t allocation_size)
+void deallocate_page_aligned_memory(void* m_data, const size_t allocation_size)
 {
     assert(m_data);
     assert(allocation_size % system_page_size == 0);
@@ -52,6 +52,8 @@ void deallocate_page_aligned_memory(void* m_data, const uint64_t allocation_size
 void pagefault_handler(int sig, siginfo_t *info, void *context)
 {
     void *fault_addr = info->si_addr;
+
+#ifdef ENABLE_GPU
 
     if(fault_addr)
     {
@@ -96,6 +98,8 @@ void pagefault_handler(int sig, siginfo_t *info, void *context)
         }
     }
 
+#endif
+
     // The segfault 'might' be GPU realted but not managed by GDF, in that case it is safe to pass it to old handler
 
     if ( (old_handler.sa_flags & SA_SIGINFO) && old_handler.sa_sigaction) // If the modern handler is set for SIGINFO and present, call it
@@ -130,7 +134,7 @@ void setup_pagefault_handler()
 {
     in_const_operator = 0; // This should only be changed to 0,1 in the data access calls and reset to 0 in pagefault handler
 
-    system_page_size = sysconf(_SC_PAGESIZE); // Get the system page size
+    assert(system_page_size == sysconf(_SC_PAGESIZE)); // Get the system page size
 
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa)); // Zero out the struct completely

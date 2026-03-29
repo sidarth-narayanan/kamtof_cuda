@@ -17,13 +17,15 @@ find_package (MPI REQUIRED)
 
 # Build in release mode by default
 if( CMAKE_BUILD_TYPE STREQUAL "" )
-   set( CMAKE_BUILD_TYPE Release )
+   set( CMAKE_BUILD_TYPE RELEASE )
+else()
+   string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 endif()
 
-set( CXX_FLAGS_RELEASE " -O3 -DNDEBUG -Werror" )
-set( CXX_FLAGS_DEBUG   "-g -O0 -fno-inline-functions -Wunused-result" )
-set( CXX_FLAGS_ASAN    "-g -O3 -DNDEBUG -fsanitize=address -fno-omit-frame-pointer " )
-set( CXX_FLAGS_RELWITHDEBINFO    "-g -O3 -DNDEBUG " )
+set( CMAKE_CXX_FLAGS_RELEASE " -O3 -DNDEBUG -Werror" )
+set( CMAKE_CXX_FLAGS_DEBUG   "-g -O0 -fno-inline-functions -Wunused-result" )
+set( CMAKE_CXX_FLAGS_ASAN    "-g -O3 -DNDEBUG -fsanitize=address -fno-omit-frame-pointer " )
+set( CMAKE_CXX_FLAGS_RELWITHDEBINFO    "-g -O3 -DNDEBUG " )
 
 if(ENABLE_GPU)
     set(NVCC_FLAGS_COMMON --expt-relaxed-constexpr)
@@ -90,12 +92,8 @@ endif()
 
 target_compile_options(solver PRIVATE
     # CUDA specific flags
-    $<$<COMPILE_LANGUAGE:CUDA>: ${NVCC_FLAGS_COMMON} ${NVCC_FLAGS_${CMAKE_BUILD_TYPE}} -Xcompiler ${CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
-
-    # C++ specific flags
-    $<$<COMPILE_LANGUAGE:CXX>: ${CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
+    $<$<COMPILE_LANGUAGE:CUDA>: ${NVCC_FLAGS_COMMON} ${NVCC_FLAGS_${CMAKE_BUILD_TYPE}} -Xcompiler ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}>
 )
-
 
 target_include_directories( solver PUBLIC
    $ENV{CPU_SOLVER_DIR}/include

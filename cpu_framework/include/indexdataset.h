@@ -14,7 +14,7 @@
 #endif
 
 #ifndef ENABLE_GPU
-    #define __deivce__
+    #define __device__
     #define __host__
 #endif
 
