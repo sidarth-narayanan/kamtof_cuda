@@ -1,7 +1,7 @@
 #include <math.h>
 
 #include "silo.h"
-#include "logger.hpp"
+#include "logger.h"
 #include "silo_fwd.h"
 #include "datasetstorage.h"
 

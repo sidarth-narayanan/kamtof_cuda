@@ -1,7 +1,7 @@
 #include "grid.h"
 #include "solver.h"
 #include "input_parser.h"
-#include "logger.hpp"
+#include "logger.h"
 
 #include <cstdlib>
 #include <sys/time.h>
@@ -29,9 +29,6 @@ int main (int argc, char** argv)
    // default name of input file
    std::string infile;
 
-   // declate input_data_ptr
-   InputParser* input_data_ptr;
-
    // input file name
    if (argc > 2)
    {
@@ -43,14 +40,14 @@ int main (int argc, char** argv)
       infile = argv[1];
 
       // initialize parser object
-      input_data_ptr = new InputParser(infile);
+      inputs = new InputParser(infile);
    }
    else if (argc < 2)
    {
       if(rank == 0)
       {
          log_msg<CDF::LogLevel::WARNING>("Missing name of input file for Laplace solver. Using default values from input parser.");
-         input_data_ptr  = new InputParser();
+         inputs  = new InputParser();
       }
    }
    else
@@ -58,37 +55,27 @@ int main (int argc, char** argv)
       infile = argv[1];
 
       // initialize parser object
-      input_data_ptr = new InputParser(infile);
+      inputs = new InputParser(infile);
    }
    
    // print input options being used from the root rank
    if(rank == 0)
    {
-      input_data_ptr->print_input_struct();
+      inputs->print_input_struct();
    }
-
-   // create local variables to store input options
-   gpu_solver            = input_data_ptr->use_gpu_solver;   // use_gpu_solver
-   implicit_solver       = input_data_ptr->implicit_solver;  // use implicit_solver
-   tol                   = input_data_ptr->tol_val;          // tolerance at which solver will stop
-   tol_type              = input_data_ptr->tol_type;         // 0: absolute , 1: relative
-   solver_type           = input_data_ptr->solver_type;      // 0: jacobi , 1: bicgstab
-   num_iter              = input_data_ptr->num_iter;         // number of inner iterations
-   gpu_global_range      = input_data_ptr->gpu_global_range; // GPU global range
-   gpu_local_range       = input_data_ptr->gpu_local_range;  // GPU local range
 
    std::vector<strict_fp_t> residual_norm;
 
 #ifdef ENABLE_GPU
-   if(gpu_solver)
+   if(inputs->use_gpu_solver)
       setup_gpu_globals();
 #endif
 
-   Grid grid(input_data_ptr->Nx, input_data_ptr->Ny);
+   Grid grid(inputs->Nx, inputs->Ny);
    grid.allocate_variables();
    grid.generate_grid();
 
-   if(!gpu_solver)
+   if(!inputs->use_gpu_solver)
    {
       Solver_base* solver_ptr = new Solver_base;
       solver_ptr->allocate_variables();
@@ -106,7 +93,7 @@ int main (int argc, char** argv)
       residual_norm.push_back(solver_ptr->print_residual_norm(0));
 
       int count = 1;
-      while(solver_ptr->get_residual_norm() > tol)
+      while(solver_ptr->get_residual_norm() > inputs->tol_val)
       {
          solver_ptr->update_solution(grid.num_solved);
          solver_ptr->compute_residual(grid.num_solved, grid.num_attached);
@@ -123,8 +110,8 @@ int main (int argc, char** argv)
          printf("CPU time to solve %f\n", time_elapsed_cpu);
 
       std::string soln_file, res_file;
-      soln_file = "laplace_solution_cpu_nx_" + std::to_string(input_data_ptr->Nx) + "_ny_" + std::to_string(input_data_ptr->Ny) + ".txt";
-      res_file  = "laplace_residual_cpu_nx_" + std::to_string(input_data_ptr->Nx) + "_ny_" + std::to_string(input_data_ptr->Ny) + ".txt";
+      soln_file = "laplace_solution_cpu_nx_" + std::to_string(inputs->Nx) + "_ny_" + std::to_string(inputs->Ny) + ".txt";
+      res_file  = "laplace_residual_cpu_nx_" + std::to_string(inputs->Nx) + "_ny_" + std::to_string(inputs->Ny) + ".txt";
 
       solver_ptr->write_solution(grid.num_solved, grid.num_cells, soln_file);
       solver_ptr->write_residual(res_file, residual_norm);
@@ -151,7 +138,7 @@ int main (int argc, char** argv)
       residual_norm.push_back(solver_ptr_gpu->print_residual_norm(0));
       
       int count = 1;
-      while(solver_ptr_gpu->get_residual_norm() > tol)
+      while(solver_ptr_gpu->get_residual_norm() > inputs->tol_val)
       {
          solver_ptr_gpu->update_solution(grid.num_solved);
          solver_ptr_gpu->compute_residual(grid.num_solved, grid.num_attached);
@@ -169,8 +156,8 @@ int main (int argc, char** argv)
 
 
       std::string soln_file, res_file;
-      soln_file = "laplace_solution_gpu_nx_" + std::to_string(input_data_ptr->Nx) + "_ny_" + std::to_string(input_data_ptr->Ny) + ".txt";
-      res_file  = "laplace_residual_gpu_nx_" + std::to_string(input_data_ptr->Nx) + "_ny_" + std::to_string(input_data_ptr->Ny) + ".txt";
+      soln_file = "laplace_solution_gpu_nx_" + std::to_string(inputs->Nx) + "_ny_" + std::to_string(inputs->Ny) + ".txt";
+      res_file  = "laplace_residual_gpu_nx_" + std::to_string(inputs->Nx) + "_ny_" + std::to_string(inputs->Ny) + ".txt";
 
       solver_ptr_gpu->write_solution(grid.num_solved, grid.num_cells, soln_file);
       solver_ptr_gpu->write_residual(res_file, residual_norm);
@@ -185,7 +172,7 @@ int main (int argc, char** argv)
    m_silo.clear_entries();
 
 #ifdef ENABLE_GPU
-      if(gpu_solver)
+      if(inputs->use_gpu_solver)
          finalize_gpu_globals();
 #endif
 

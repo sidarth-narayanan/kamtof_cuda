@@ -7,7 +7,7 @@
 #include "datasetstorage.h"
 #include "extractor.hpp"
 #include "silo_utils.h"
-#include "logger.hpp"
+#include "logger.h"
 #include <limits>
 
 template <CDF::StorageType TYPE>

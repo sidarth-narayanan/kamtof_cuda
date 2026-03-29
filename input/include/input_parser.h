@@ -39,3 +39,5 @@ public:
 
     std::string input_filename = "NULL"; // default name of input filename                    
 };
+
+extern InputParser* inputs;

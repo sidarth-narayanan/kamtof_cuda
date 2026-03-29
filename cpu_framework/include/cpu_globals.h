@@ -5,21 +5,10 @@
 #endif
 
 #include <set>
-#include "fp_data_types.h"
 
 // MPI Globals
 CDF_GLOBAL int rank, numprocs;
 CDF_GLOBAL int local_rank, local_numprocs;
-
-// Inputs
-CDF_GLOBAL bool gpu_solver;
-CDF_GLOBAL bool implicit_solver;
-CDF_GLOBAL strict_fp_t tol;
-CDF_GLOBAL int tol_type;
-CDF_GLOBAL int solver_type;
-CDF_GLOBAL int num_iter;
-CDF_GLOBAL size_t gpu_global_range;
-CDF_GLOBAL size_t gpu_local_range;
 
 // Global variable to tell if the pagefault call is triggered by the const (or) the non const operator of DSB
 CDF_GLOBAL bool in_const_operator;

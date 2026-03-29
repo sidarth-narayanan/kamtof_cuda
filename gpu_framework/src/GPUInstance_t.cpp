@@ -2,7 +2,7 @@
 #include <cassert> // For assert
 #include "datasetbasegpu.h" // For DSBGPU members
 #include "datasetbase.h"
-#include "logger.hpp"
+#include "logger.h"
 
 namespace  GDF
 {

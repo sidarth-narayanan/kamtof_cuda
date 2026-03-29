@@ -68,16 +68,21 @@ if(ENABLE_GPU)
 endif()
 
 set( ENV{PROJECT_ROOT_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+set( ENV{INPUT_FRAMEWORK_DIR} $ENV{PROJECT_ROOT_DIR}/input )
 set( ENV{CPU_FRAMEWORK_DIR} $ENV{PROJECT_ROOT_DIR}/cpu_framework )
 set( ENV{CPU_SOLVER_DIR} $ENV{PROJECT_ROOT_DIR}/solver/cpu )
+
+# Add the framework subdirs
+add_subdirectory( $ENV{INPUT_FRAMEWORK_DIR} )
+
+add_subdirectory( $ENV{CPU_FRAMEWORK_DIR} )
 
 if (ENABLE_GPU)
    set( ENV{GPU_FRAMEWORK_DIR} $ENV{PROJECT_ROOT_DIR}/gpu_framework )
    add_subdirectory( $ENV{GPU_FRAMEWORK_DIR} )
 endif()
 
-add_subdirectory( $ENV{CPU_FRAMEWORK_DIR} )
-
+# Add solver source
 aux_source_directory( $ENV{CPU_SOLVER_DIR}/src CpuSolverSrcTop)
 
 if(ENABLE_GPU)
@@ -97,8 +102,10 @@ target_compile_options(solver PRIVATE
 
 target_include_directories( solver PUBLIC
    $ENV{CPU_SOLVER_DIR}/include
+   $ENV{INPUT_FRAMEWORK_DIR}/include
    $ENV{CPU_FRAMEWORK_DIR}/include
    $ENV{CPU_FRAMEWORK_DIR}/include/detail
+   $ENV{INPUT_FRAMEWORK_DIR}/include
 )
 
 if (ENABLE_GPU)

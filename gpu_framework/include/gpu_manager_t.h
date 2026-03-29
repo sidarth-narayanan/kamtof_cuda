@@ -6,7 +6,7 @@
 #include "silo_fwd.h" // For DSB and DSS
 #include "datasetstoragegpu.h" // For DSSGPU, SILO error handling, GPUInstance member functions
 #include "gpu_silo_fwd.h" // For DSSGPURead
-#include "logger.hpp"
+#include "logger.h"
 #include "cpu_globals.h"
 #include "gpu_backend.h"
 

@@ -6,7 +6,7 @@
 #include "extractor.hpp"
 #include "silo_utils.h"
 #include "cpu_globals.h"
-#include "logger.hpp"
+#include "logger.h"
 
 
 dataSetBase::dataSetBase(const std::string& name, const uint64_t m_num_entries, const CDF::StorageType storage_type, const CDF::POD_t pod_type, const uint8_t dims,

@@ -18,6 +18,7 @@ target_include_directories( gpu_framework PUBLIC
    ${GPU_FRAMEWORK_DIR}/include/detail
    $ENV{CPU_FRAMEWORK_DIR}/include
    $ENV{CPU_FRAMEWORK_DIR}/include/detail
+   $ENV{INPUT_FRAMEWORK_DIR}/include
 )
 
 target_link_libraries(gpu_framework MPI::MPI_CXX cublas cusparse) # FIXME: Add CUDA here

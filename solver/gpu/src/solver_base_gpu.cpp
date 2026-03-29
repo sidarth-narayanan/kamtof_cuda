@@ -11,6 +11,7 @@
 #include "silo.h"
 #include "silo_fwd.h"
 #include "fp_data_types.h"
+#include "input_parser.h"
 
 #include "gpu_api_functions.h"
 #include "sparseSPMV.h"
@@ -221,7 +222,7 @@ void Solver_base_gpu::update_solution(const int num_solved)
 {
    Cell<strict_fp_t> Q_cell_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("Q_cell_local");
    
-   if(implicit_solver == false)
+   if(inputs->implicit_solver == false)
    {
       CellRead<strict_fp_t> volume_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("volume_local");
       CellRead<strict_fp_t> residual_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("residual_local");
@@ -234,7 +235,7 @@ void Solver_base_gpu::update_solution(const int num_solved)
    }
    else
    {
-      if(solver_type == 0)
+      if(inputs->solver_type == 0)
       {
          jacobi_linear_solver(num_solved);
       }
@@ -394,7 +395,7 @@ void Solver_base_gpu::jacobi_linear_solver(const int num_solved)
    GDF::transfer_to_gpu_noinit(dQ_old_local);
    GDF::memset_gpu_var(dQ_old_local.gpu_data(), 0, sizeof(strict_fp_t) * num_solved);
 
-   for (unsigned int iter = 0; iter < num_iter; iter++)
+   for (unsigned int iter = 0; iter < inputs->num_iter; iter++)
    {
       mpi_nbnb_transfer_gpu(dQ_old_local.gpu_data());
       
@@ -552,7 +553,7 @@ void Solver_base_gpu::bicgstab_linear_solver()
    GDF::memcpy_gpu_var(r, r0, sizeof(strict_fp_t) * nrow_local);
    GDF::memcpy_gpu_var(p, r0, sizeof(strict_fp_t) * nrow_local);
 
-   for(int iter = 0; iter < num_iter; iter++)
+   for(int iter = 0; iter < inputs->num_iter; iter++)
    {
       // p1 = p
       GDF::memcpy_gpu_var(p1, p, sizeof(strict_fp_t) * nrow_local);
@@ -614,7 +615,7 @@ void Solver_base_gpu::bicgstab_linear_solver()
 
 void Solver_base_gpu::setup_matrix_struct(const int num_solved, const int num_involved)
 {
-   if(implicit_solver == true)
+   if(inputs->implicit_solver == true)
    {
       Vector<int> ia_local = m_silo.retrieve_entry<int, CDF::StorageType::VECTOR>("ia_local");
       Vector<int> ja_local = m_silo.retrieve_entry<int, CDF::StorageType::VECTOR>("ja_local");
@@ -915,7 +916,7 @@ void Solver_base_gpu::compute_time_step(const int num_solved, const int num_atta
    // This is the limit. (dt / dx2) + (dt / dy2) < 0.5
    delta_t = 1.0 / (min_value[0] * min_value[0] * 2.0);     // 2.0 added to reduce from limit.
 
-   if(implicit_solver == true)
+   if(inputs->implicit_solver == true)
       delta_t = delta_t * 10.0;
 
    if(rank == 0)
@@ -1263,7 +1264,7 @@ void Solver_base_gpu::compute_residual(const int num_solved, const int num_attac
 
    MPI_Allreduce(&(this->residual_norm), &(this->residual_norm), 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-   if(implicit_solver == true)
+   if(inputs->implicit_solver == true)
    {
       Cell<strict_fp_t> rhs_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("rhs_local");
 
@@ -1411,7 +1412,7 @@ private:
 
 void Solver_base_gpu::compute_system(const int num_solved, const int num_attached)
 {
-   if(implicit_solver == true)
+   if(inputs->implicit_solver == true)
    {
       Vector<strict_fp_t> A_data_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("A_data_local");
 

@@ -1,9 +1,8 @@
-#ifndef DATASETSTORAGE_HPP
-#define DATASETSTORAGE_HPP
+#pragma once
 
 #include "datasetstorage.h"
 #include "extractor.hpp"
-#include "logger.hpp"
+#include "logger.h"
 
 template <class T, CDF::StorageType TYPE, uint8_t DIMS>
 dataSetStorage<T, TYPE, DIMS>::dataSetStorage(const std::string &name, const uint64_t m_num_entries, const uint8_t* const shape, const bool is_unresolved_entry, const bool allocate_mem):
@@ -34,5 +33,3 @@ void dataSetStorage<T, TYPE, DIMS>::deallocate_memory()
    dataSetBase::delete_m_data();
    dataSetBase::m_data = nullptr;
 }
-
-#endif // DATASETSTORAGE_HPP

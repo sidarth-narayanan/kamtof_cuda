@@ -1,5 +1,4 @@
-#ifndef LOGGER_HPP
-#define LOGGER_HPP
+#pragma once
 
 #include <iostream>
 #include "cpu_framework_enums.h"
@@ -63,5 +62,3 @@ inline void log_debug(std::string msg)
 {
    log_msg<CDF::LogLevel::DEBUG>(msg);
 }
-
-#endif // LOGGER_HPP

@@ -11,7 +11,11 @@ add_library( cpu_framework ${CpuFrameworkSrcTop} )
 target_include_directories( cpu_framework PUBLIC
    ${CPU_FRAMEWORK_DIR}/include
    ${CPU_FRAMEWORK_DIR}/include/detail
+   $ENV{INPUT_FRAMEWORK_DIR}/include
 )
+
+# FIXME: Does this need to be PUBLIC ?
+target_link_libraries(cpu_framework PUBLIC input_framework)
 
 ###### Add target and dependencies for unit tests ##############
 set( BUILD_TEST $ENV{BUILD_XDF_TESTS})

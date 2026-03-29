@@ -2,7 +2,7 @@
 
 #include "silo_utils.h"
 #include "cpu_framework_enums.h"
-#include "logger.hpp"
+#include "logger.h"
 
 std::string get_storage_type_name(const CDF::StorageType &TYPE)
 {

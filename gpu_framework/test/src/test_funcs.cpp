@@ -14,6 +14,8 @@
 #include <tuple>
 #include <algorithm>
 
+strict_fp_t tol = 1.0e-08;
+
 
 bool a_not_equal_b(const strict_fp_t& a, const strict_fp_t& b, const strict_fp_t& tol_percent)
 {

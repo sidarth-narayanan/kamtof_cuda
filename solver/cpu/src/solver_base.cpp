@@ -11,6 +11,7 @@
 #include "silo.h"
 #include "silo_fwd.h"
 #include "fp_data_types.h"
+#include "input_parser.h"
 
 Solver_base::Solver_base()
 {
@@ -92,7 +93,7 @@ void Solver_base::update_solution(const int num_solved)
 {
    Cell<strict_fp_t> Q_cell_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("Q_cell_local");
    
-   if(implicit_solver == false)
+   if(inputs->implicit_solver == false)
    {
       CellRead<strict_fp_t> volume_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("volume_local");
       CellRead<strict_fp_t> residual_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("residual_local");
@@ -104,7 +105,7 @@ void Solver_base::update_solution(const int num_solved)
    }
    else
    {
-      if(solver_type == 0)
+      if(inputs->solver_type == 0)
       {
          jacobi_linear_solver(num_solved);
       }
@@ -212,7 +213,7 @@ void Solver_base::jacobi_linear_solver(const int num_solved)
       dQ_old_local[i] = 0.0;
    }
 
-   for (unsigned int iter = 0; iter < num_iter; iter++)
+   for (unsigned int iter = 0; iter < inputs->num_iter; iter++)
    {
       mpi_nbr_communication(dQ_old_local.cpu_data());
 
@@ -305,7 +306,7 @@ void Solver_base::bicgstab_linear_solver()
    memcpy(r, r0, nrow_local * sizeof(strict_fp_t));
    memcpy(p, r0, nrow_local * sizeof(strict_fp_t));
 
-   for(int iter = 0; iter < num_iter; iter++)
+   for(int iter = 0; iter < inputs->num_iter; iter++)
    {
       memcpy(p1, p, nrow_local * sizeof(strict_fp_t)); // no preconditioner
 
@@ -355,7 +356,7 @@ void Solver_base::bicgstab_linear_solver()
 
 void Solver_base::setup_matrix_struct(const int num_solved, const int num_involved)
 {
-   if(implicit_solver == true)
+   if(inputs->implicit_solver == true)
    {
       Vector<int> ia_local = m_silo.retrieve_entry<int, CDF::StorageType::VECTOR>("ia_local");
       Vector<int> ja_local = m_silo.retrieve_entry<int, CDF::StorageType::VECTOR>("ja_local");
@@ -471,7 +472,7 @@ void Solver_base::compute_time_step(const int num_solved, const int num_attached
    // This is the limit. (dt / dx2) + (dt / dy2) < 0.5
    delta_t = 1.0 / (min_value * min_value * 2.0);     // 2.0 added to reduce from limit.
 
-   if(implicit_solver == true)
+   if(inputs->implicit_solver == true)
       delta_t = delta_t * 10.0;
 
    if(rank == 0)
@@ -480,7 +481,7 @@ void Solver_base::compute_time_step(const int num_solved, const int num_attached
 
 void Solver_base::compute_system(const int num_solved, const int num_attached)
 {
-   if(implicit_solver == true)
+   if(inputs->implicit_solver == true)
    {
       Vector<strict_fp_t> A_data_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::VECTOR>("A_data_local");
       
@@ -522,8 +523,6 @@ void Solver_base::compute_system(const int num_solved, const int num_attached)
       }
 
       // Diffusion term for boundary cells
-      VectorRead<int> ranks_list = m_silo.retrieve_entry<int, CDF::StorageType::VECTOR>("ranks_list");
-      VectorRead<int> global_local = m_silo.retrieve_entry<int, CDF::StorageType::VECTOR>("global_local");
       BoundaryRead<int> boundary_face_to_cell_local = m_silo.retrieve_entry<int, CDF::StorageType::BOUNDARY>("boundary_face_to_cell_local");
       BoundaryRead<strict_fp_t> boundary_rdista_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::BOUNDARY>("boundary_rdista_local");
       
@@ -577,7 +576,7 @@ void Solver_base::compute_residual(const int num_solved, const int num_attached)
    
    compute_residual_norm(num_solved);
    
-   if(implicit_solver == true)
+   if(inputs->implicit_solver == true)
    {
       Cell<strict_fp_t> rhs_local = m_silo.retrieve_entry<strict_fp_t, CDF::StorageType::CELL>("rhs_local");
    

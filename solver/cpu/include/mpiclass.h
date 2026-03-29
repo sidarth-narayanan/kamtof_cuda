@@ -9,7 +9,7 @@
 #include "silo.h"
 #include "silo_fwd.h"
 #include "fp_data_types.h"
-
+#include "input_parser.h"
 #ifdef ENABLE_GPU
 #include "gpu_api_functions.h"
 #endif
@@ -45,7 +45,7 @@ public:
       delete[] rbuf;
 
 #ifdef ENABLE_GPU
-      if(gpu_solver)
+      if(inputs->use_gpu_solver)
       {
          GDF::free_gpu_var(gpu_slist);
          GDF::free_gpu_var(gpu_rlist);

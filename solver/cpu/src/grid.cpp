@@ -560,7 +560,7 @@ void Grid::assign_mpi_grid()
    mpiparams->rlist = rlist;
 
 #ifdef ENABLE_GPU
-   if(gpu_solver)
+   if(inputs->use_gpu_solver)
    {
       mpiparams->gpu_sbuf = static_cast<strict_fp_t*>(GDF::malloc_gpu_var(sizeof(strict_fp_t) * ssize));
       mpiparams->gpu_rbuf = static_cast<strict_fp_t*>(GDF::malloc_gpu_var(sizeof(strict_fp_t) * rsize));

@@ -1,5 +1,6 @@
 #include "gpu_globals.h" // For GPU Globals
 #include "gpu_api_functions.h" // For GPU API functions
+#include "input_parser.h"
 
 // Allocate and initialize GPU variables
 void setup_gpu_globals()
@@ -11,7 +12,7 @@ void setup_gpu_globals()
 
    // Setup GPU Manager (Has no variable which needs to be accesed on GPU)
    assert(!gpu_manager);
-   gpu_manager = new GDF::GPUManager_t(gpu_global_range, gpu_local_range);
+   gpu_manager = new GDF::GPUManager_t(inputs->gpu_global_range, inputs->gpu_local_range);
 
    GDF::init_cublashandle();
 
