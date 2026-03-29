@@ -17,7 +17,7 @@
 #include "pagefault_handler.h"
 #endif
 
-
+// FIXME: Move main to a non CPU/GPU folder
 int main (int argc, char** argv)
 {
    mpi_init(&argc, &argv);

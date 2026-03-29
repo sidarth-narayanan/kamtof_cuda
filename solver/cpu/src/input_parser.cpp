@@ -8,6 +8,18 @@
 #include <algorithm>
 #include <cassert>
 
+// list of all valid input strings
+static const std::vector<std::string> reference_input_strings = {"use_gpu_solver",
+                                          "implicit_solver",
+                                          "Nx",
+                                          "Ny",
+                                          "tol_type",
+                                          "tol_val",
+                                          "num_iter",
+                                          "solver_type",
+                                          "gpu_global_range",
+                                          "gpu_local_range"};
+
 /**
  * @brief InputParser: Constructor for parsing input file data.
  * @param input_filename: Name of input file
@@ -21,7 +33,7 @@ InputParser::InputParser(std::string input_file) : input_filename(input_file)
  * @brief InputParser: Constructor for setting default values for input options in the absence of an input file.
  * @param input_filename: Name of input file
 */
-InputParser::InputParser() {};
+InputParser::InputParser() {}
 
 /**
  * @brief read_inputs: Read input file and store data in an input_struct
@@ -29,11 +41,8 @@ InputParser::InputParser() {};
 */
 void InputParser::read_inputs(const std::string& input_filename)
 {
-   // create a local variable to store strings of valid input options
-   std::vector<std::string> input_strings = this->input_strings;
-   
    // total number of valid inputs contained in the input data struct
-   const int ninputs = input_strings.size();
+   const int ninputs = reference_input_strings.size();
 
    // preparing to read input file line-by-line
    std::ifstream file(input_filename);
@@ -46,7 +55,7 @@ void InputParser::read_inputs(const std::string& input_filename)
    {
       while (std::getline(file,line))
       {
-         input_str = find_input_option(input_strings, ninputs, line, input_count);
+         input_str = find_input_option(reference_input_strings, line, input_count);
          parse_input_value(input_str, line);
       }
       file.close();
@@ -76,7 +85,6 @@ void InputParser::read_inputs(const std::string& input_filename)
  * @param input_count  : Running count of number of valid input options found.
 */
 std::string InputParser::find_input_option(const std::vector<std::string>& input_strings,
-                              const int ninputs,
                               const std::string& line,
                               int& input_count)
 {
@@ -87,7 +95,7 @@ std::string InputParser::find_input_option(const std::vector<std::string>& input
 
    // loop over all valid input options and check if an input option is contained
    // on this line
-   for (int iinput = 0; iinput < ninputs; iinput++)
+   for (int iinput = 0; iinput < input_strings.size(); iinput++)
    {
       // store input option in a local variable
       local_string = input_strings[iinput];
@@ -140,19 +148,19 @@ void InputParser::parse_input_value(std::string& input_string,
 
    if (input_string == "use_gpu_solver")
    {
-      this->use_gpu_solver =  static_cast<bool>(stoi(temp_str));
+      this->use_gpu_solver =  static_cast<bool>(std::stoi(temp_str));
    }
    else if (input_string == "implicit_solver")
    {
-      this->implicit_solver =  static_cast<bool>(stoi(temp_str));
+      this->implicit_solver =  static_cast<bool>(std::stoi(temp_str));
    }
    else if (input_string == "Nx")
    {
-      this->Nx = stoi(temp_str);
+      this->Nx = std::stoi(temp_str);
    }
    else if (input_string == "Ny")
    {
-      this->Ny = stoi(temp_str);
+      this->Ny = std::stoi(temp_str);
    }
    else if (input_string == "tol_type")
    {
@@ -177,7 +185,7 @@ void InputParser::parse_input_value(std::string& input_string,
    }
    else if (input_string == "num_iter")
    {
-      this->num_iter = stoi(temp_str);
+      this->num_iter = std::stoi(temp_str);
    }
    else if (input_string == "solver_type")
    {
@@ -198,11 +206,11 @@ void InputParser::parse_input_value(std::string& input_string,
    }
    else if(input_string == "gpu_global_range")
    {
-      this->gpu_global_range = stoi(temp_str);
+      this->gpu_global_range = std::stoi(temp_str);
    }
    else if(input_string == "gpu_local_range")
    {
-      this->gpu_local_range = stoi(temp_str);
+      this->gpu_local_range = std::stoi(temp_str);
    }
    else
    {
@@ -217,25 +225,19 @@ void InputParser::parse_input_value(std::string& input_string,
 */
 void InputParser::print_input_struct()
 {
-   // create a local variable to store strings of valid input options
-   std::vector<std::string> input_strings = this->input_strings;
-   
-   // total number of valid inputs contained in the input data struct
-   const int ninputs = input_strings.size();
-
    printf("----------------- PRINTING VALUES FROM INPUT FILES --------------\n");
 
    // print out all values contained in the struct
-   print_variable_value(input_strings[0],this->use_gpu_solver);
-   print_variable_value(input_strings[1],this->implicit_solver);
-   print_variable_value(input_strings[2],this->Nx);
-   print_variable_value(input_strings[3],this->Ny);
-   print_variable_value(input_strings[4],this->tol_type);
-   print_variable_value(input_strings[5],this->tol_val);
-   print_variable_value(input_strings[6],this->num_iter);
-   print_variable_value(input_strings[7],this->solver_type);
-   print_variable_value(input_strings[8],this->gpu_global_range);
-   print_variable_value(input_strings[9],this->gpu_local_range);
+   print_variable_value(reference_input_strings[0],this->use_gpu_solver);
+   print_variable_value(reference_input_strings[1],this->implicit_solver);
+   print_variable_value(reference_input_strings[2],this->Nx);
+   print_variable_value(reference_input_strings[3],this->Ny);
+   print_variable_value(reference_input_strings[4],this->tol_type);
+   print_variable_value(reference_input_strings[5],this->tol_val);
+   print_variable_value(reference_input_strings[6],this->num_iter);
+   print_variable_value(reference_input_strings[7],this->solver_type);
+   print_variable_value(reference_input_strings[8],this->gpu_global_range);
+   print_variable_value(reference_input_strings[9],this->gpu_local_range);
 
    printf("-----------------------------------------------------------------\n");
 
@@ -246,7 +248,7 @@ void InputParser::print_input_struct()
  * @brief print_variable_value: print value of a variable from the input struct
 */
 template <typename T>
-void InputParser::print_variable_value(std::string& varname, T& value)
+void InputParser::print_variable_value(const std::string &varname, T& value)
 {
    std::cout << varname << ": " << value << std::endl;
 }

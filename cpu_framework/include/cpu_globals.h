@@ -1,15 +1,17 @@
-#ifndef CPU_GLOBALS_H
-#define CPU_GLOBALS_H
+#pragma once
 
 #ifndef CDF_GLOBAL
-   #define CDF_GLOBAL extern
+    #define CDF_GLOBAL extern
 #endif
 
 #include <set>
 #include "fp_data_types.h"
 
+// MPI Globals
 CDF_GLOBAL int rank, numprocs;
 CDF_GLOBAL int local_rank, local_numprocs;
+
+// Inputs
 CDF_GLOBAL bool gpu_solver;
 CDF_GLOBAL bool implicit_solver;
 CDF_GLOBAL strict_fp_t tol;
@@ -28,5 +30,3 @@ CDF_GLOBAL int system_page_size;
 // Ordered set which stores the m_data value and it's corresponding DSB pointer in order to look up the DSB which triggered the pagefault
 class dataSetBase;
 CDF_GLOBAL std::set<std::pair<void*, dataSetBase*>> dsb_addr_set;
-
-#endif // CPU_GLOBALS_H
